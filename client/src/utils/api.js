@@ -1,7 +1,14 @@
 import axios from 'axios';
 
+const FALLBACK_API_URL = 'https://thakkar-traders-dz-infotech.onrender.com/api';
+const configuredApiUrl = import.meta.env.VITE_API_URL;
+const baseURL =
+  configuredApiUrl && !configuredApiUrl.includes('vercel.app')
+    ? configuredApiUrl
+    : FALLBACK_API_URL;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },

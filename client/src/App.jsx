@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/shared/PrivateRoute';
+import PublicLayout from './layouts/PublicLayout';
 
 import HomePage from './pages/public/HomePage';
 import ProductsPage from './pages/public/ProductsPage';
@@ -24,12 +25,14 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/brands" element={<BrandsPage />} />
-          <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/gallery" element={<GalleryPage />} />
-          <Route path="/contact" element={<ContactPage />} />
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/brands" element={<BrandsPage />} />
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+          </Route>
 
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLoginPage />} />

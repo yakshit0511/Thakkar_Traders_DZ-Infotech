@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,7 +13,8 @@ import {
   Menu,
   X,
   User,
-  ExternalLink
+  ExternalLink,
+  WifiOff,
 } from 'lucide-react';
 import '../../styles/admin.css';
 
@@ -22,6 +23,18 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const goOnline  = () => setIsOnline(true);
+    const goOffline = () => setIsOnline(false);
+    window.addEventListener('online',  goOnline);
+    window.addEventListener('offline', goOffline);
+    return () => {
+      window.removeEventListener('online',  goOnline);
+      window.removeEventListener('offline', goOffline);
+    };
+  }, []);
 
   const menuItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
@@ -39,16 +52,39 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-[var(--admin-bg-card)] border-r border-[var(--admin-border)]">
-      {/* Brand Monogram Header */}
-      <div className="flex items-center gap-3 px-6 py-6 border-b border-[var(--admin-border)]">
-        <div className="w-10 h-10 rounded-lg bg-[var(--admin-bg-elevated)] border border-[var(--admin-border)] flex items-center justify-center shadow-md">
-          <span className="text-lg font-bold text-[var(--admin-accent)]">TT</span>
+      {/* Brand Header */}
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-[var(--admin-border)]">
+        <div
+          style={{
+            background: 'linear-gradient(145deg, #263A5E 0%, #1C2E4E 100%)',
+            border: '1px solid rgba(201,168,76,0.28)',
+            borderRadius: '10px',
+            padding: '5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+          }}
+        >
+          <img
+            src="/thakkar-logo-transparent.png"
+            alt="Thakkar Traders"
+            style={{
+              height: '36px',
+              width: '36px',
+              objectFit: 'contain',
+              display: 'block',
+              filter: 'brightness(1.15) saturate(1.08)',
+            }}
+          />
         </div>
         <div>
           <h1 className="text-sm font-bold tracking-wider text-[var(--admin-text-primary)]">THAKKAR</h1>
           <p className="text-[10px] font-semibold tracking-widest text-[var(--admin-accent)]">CONTROL PANEL</p>
         </div>
       </div>
+
 
       {/* Navigation list */}
       <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
@@ -61,11 +97,10 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
               key={item.name}
               to={item.path}
               onClick={() => setIsSidebarOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                isActive
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${isActive
                   ? 'bg-[var(--admin-accent)] text-[#080C14] font-semibold shadow-lg shadow-[var(--admin-accent)]/10'
                   : 'text-[var(--admin-text-secondary)] hover:bg-[var(--admin-bg-elevated)] hover:text-[var(--admin-text-primary)]'
-              }`}
+                }`}
             >
               <Icon className="h-4.5 w-4.5" />
               <span>{item.name}</span>
@@ -111,6 +146,30 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
 
   return (
     <div className="admin-theme min-h-screen bg-[var(--admin-bg-deep)]">
+      {/* ── Offline Banner ── */}
+      {!isOnline && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 9999,
+            background: 'linear-gradient(90deg, #1a0800 0%, #2d1500 50%, #1a0800 100%)',
+            borderBottom: '1px solid rgba(201,168,76,0.4)',
+            padding: '0.55rem 1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.625rem',
+          }}
+        >
+          <WifiOff style={{ width: '14px', height: '14px', color: '#C9A84C', flexShrink: 0 }} />
+          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', color: '#C9A84C', margin: 0 }}>
+            YOU ARE OFFLINE — Changes will not be saved until connection is restored.
+          </p>
+        </div>
+      )}
       {/* Desktop Sidebar */}
       <aside className="fixed top-0 bottom-0 left-0 z-20 hidden md:block w-64">
         {sidebarContent}

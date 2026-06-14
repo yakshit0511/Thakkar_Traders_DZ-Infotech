@@ -14,7 +14,8 @@ import {
   Eye,
   CheckCircle,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Settings
 } from 'lucide-react';
 import '../../styles/admin.css';
 

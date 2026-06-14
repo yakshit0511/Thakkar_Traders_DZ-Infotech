@@ -1,4 +1,7 @@
-require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+// In local dev, load from root .env; on Render/Railway env vars are injected by the platform
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+}
 
 const express = require('express');
 const cors = require('cors');

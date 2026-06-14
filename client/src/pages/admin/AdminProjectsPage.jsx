@@ -1,622 +1,516 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import adminAxios from '../../utils/adminAxios';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  FolderGit2,
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Check,
-  X,
-  Upload,
-  AlertCircle,
-  Eye,
-  EyeOff,
-  Star,
-  MapPin,
-  Calendar
-} from 'lucide-react';
+import { PlusCircle, Trash2, X, FolderOpen, MapPin, Star, AlertTriangle, LayoutGrid, List, Edit3, Upload, RefreshCw } from 'lucide-react';
+import { useToast } from '../../components/admin/ToastNotification';
 import '../../styles/admin.css';
 
 const PROJECT_CATEGORIES = [
-  'Residential',
-  'Commercial',
-  'Office Spaces',
-  'Hospitality',
-  'Showrooms',
-  'Premium Furniture'
+  { value: 'residential', label: 'Residential' },
+  { value: 'commercial', label: 'Commercial' },
+  { value: 'hospitality', label: 'Hospitality' },
+  { value: 'retail', label: 'Retail' },
+  { value: 'institutional', label: 'Institutional' },
 ];
 
+/* ── Toggle Switch ─────────────────────────────────────────────────────── */
+const Toggle = ({ checked, onChange, green }) => (
+  <div onClick={() => onChange(!checked)} style={{ width: 44, height: 24, borderRadius: 100, background: checked ? (green ? '#2ECC71' : '#C9A84C') : '#1C2640', position: 'relative', cursor: 'pointer', transition: 'background 0.25s', flexShrink: 0 }}>
+    <div style={{ position: 'absolute', top: 3, left: checked ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left 0.25s' }} />
+  </div>
+);
+
+const TagInput = ({ tags, onChange, placeholder, maxTags = 15 }) => {
+  const [input, setInput] = useState('');
+  const uid = useRef(Math.random().toString(36).slice(2));
+  const onKey = (e) => {
+    if ((e.key === 'Enter' || e.key === ',') && input.trim() && tags.length < maxTags) {
+      e.preventDefault();
+      if (!tags.includes(input.trim())) onChange([...tags, input.trim()]);
+      setInput('');
+    }
+    if (e.key === 'Backspace' && !input && tags.length) onChange(tags.slice(0, -1));
+  };
+  return (
+    <div style={{ background: '#0F1520', border: '1px solid #1F2D45', padding: '8px 10px', minHeight: 44, display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', cursor: 'text', borderRadius: 0 }}
+      onClick={() => document.getElementById('ti-' + uid.current)?.focus()}>
+      {tags.map((t, i) => (
+        <span key={i} style={{ background: '#1C2640', border: '1px solid #2A3D5C', color: '#E8EDF5', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', padding: '3px 8px', display: 'flex', alignItems: 'center', gap: 6, borderRadius: 0 }}>
+          {t} <button onClick={e => { e.stopPropagation(); onChange(tags.filter((_, idx) => idx !== i)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8BA8', padding: 0, display: 'flex', lineHeight: 1 }}><X size={10} /></button>
+        </span>
+      ))}
+      <input id={'ti-' + uid.current} value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKey}
+        placeholder={tags.length === 0 ? placeholder : ''}
+        style={{ background: 'none', border: 'none', outline: 'none', color: '#E8EDF5', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem', minWidth: 120, flex: 1, borderRadius: 0 }} />
+    </div>
+  );
+};
+
+/* Delete Dialog */
+const DeleteDialog = ({ name, onCancel, onConfirm, loading }) => (
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+    style={{ position: 'fixed', inset: 0, zIndex: 400, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+    onClick={onCancel}>
+    <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
+      onClick={e => e.stopPropagation()}
+      style={{ background: '#151D2E', border: '1px solid #1F2D45', padding: 32, maxWidth: 400, width: '100%', textAlign: 'center', borderRadius: 0 }}>
+      <Trash2 size={32} color="#E74C3C" style={{ margin: '0 auto 16px' }} />
+      <p style={{ fontSize: '1rem', fontWeight: 600, color: '#E8EDF5', fontFamily: "'Inter', sans-serif", marginBottom: 8 }}>DELETE PROJECT</p>
+      <p style={{ fontSize: '0.85rem', fontWeight: 300, color: '#7A8BA8', fontFamily: "'Inter', sans-serif", marginBottom: 28, lineHeight: 1.6 }}>
+        This will permanently delete <strong style={{ color: '#E8EDF5' }}>{name}</strong>. This action cannot be undone.
+      </p>
+      <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+        <button onClick={onCancel} style={{ background: '#1C2640', color: '#7A8BA8', border: '1px solid #2A3D5C', padding: '12px 24px', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', cursor: 'pointer', borderRadius: 0 }}>CANCEL</button>
+        <button onClick={onConfirm} disabled={loading} style={{ background: '#E74C3C', color: '#fff', border: 'none', padding: '12px 24px', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', cursor: 'pointer', opacity: loading ? 0.6 : 1, borderRadius: 0 }}>
+          {loading ? 'DELETING…' : 'DELETE'}
+        </button>
+      </div>
+    </motion.div>
+  </motion.div>
+);
+
+/* ── Add / Edit Drawer ─────────────────────────────────────────────────── */
+const ProjectDrawer = ({ project, onClose, onSaved }) => {
+  const isEdit = !!project?._id;
+  const showToast = useToast();
+  const fileRef = useRef();
+  const [saving, setSaving] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const curYear = new Date().getFullYear();
+
+  const [form, setForm] = useState({
+    title: project?.title || '',
+    subtitle: project?.subtitle || '',
+    location: project?.location || '',
+    year: project?.year || curYear,
+    category: project?.category || 'residential',
+    description: project?.description || '',
+    materialsUsed: project?.materialsUsed || [],
+    isActive: project?.isActive ?? true,
+    isFeatured: project?.isFeatured ?? false,
+    displayOrder: project?.displayOrder ?? 0,
+  });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(project?.coverImageUrl || '');
+
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const onFileChange = (e) => {
+    const f = e.target.files[0];
+    if (f && f.type.startsWith('image/')) { setImageFile(f); setImagePreview(URL.createObjectURL(f)); }
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) {
+      setImageFile(f);
+      setImagePreview(URL.createObjectURL(f));
+    }
+  };
+
+  const handleSave = async () => {
+    if (!form.title.trim()) { showToast('warning', 'Project title is required'); return; }
+    if (!form.location.trim()) { showToast('warning', 'Location is required'); return; }
+    setSaving(true);
+    try {
+      const fd = new FormData();
+      Object.entries(form).forEach(([k, v]) => {
+        if (Array.isArray(v)) v.forEach(item => fd.append(k + '[]', item));
+        else fd.append(k, v);
+      });
+      if (imageFile) fd.append('image', imageFile);
+
+      const res = isEdit
+        ? await adminAxios.put(`/projects/${project._id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+        : await adminAxios.post('/projects', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+
+      if (res.data?.success || res.data?.data) {
+        showToast('success', isEdit ? 'Project updated successfully' : 'Project created successfully');
+        onSaved();
+      }
+    } catch (err) { showToast('error', err.response?.data?.message || 'Save failed'); }
+    finally { setSaving(false); }
+  };
+
+  const inputSt = { background: '#0F1520', border: '1px solid #1F2D45', color: '#E8EDF5', padding: '10px 14px', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem', width: '100%', boxSizing: 'border-box', outline: 'none', transition: 'border-color 0.2s', borderRadius: 0 };
+  const labelSt = { fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.12em', color: '#7A8BA8', textTransform: 'uppercase', marginBottom: 6, display: 'block' };
+  const fieldSt = { marginBottom: 20 };
+  const fo = e => e.target.style.borderColor = '#C9A84C';
+  const bl = e => e.target.style.borderColor = '#1F2D45';
+
+  return (
+    <>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 195, background: 'rgba(0,0,0,0.6)' }} />
+      <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        style={{ position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 200, width: 'min(580px, 100vw)', background: '#0F1520', borderLeft: '1px solid #1F2D45', display: 'flex', flexDirection: 'column', borderRadius: 0 }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 28px', borderBottom: '1px solid #1F2D45', flexShrink: 0 }}>
+          <span style={{ fontSize: '0.65rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.2em', color: '#7A8BA8' }}>{isEdit ? 'EDIT PROJECT' : 'ADD PROJECT'}</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8BA8' }}><X size={18} /></button>
+        </div>
+
+        {/* Scrollable form */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '28px 28px 0' }}>
+          <div style={fieldSt}>
+            <label style={labelSt}>Project Title *</label>
+            <input value={form.title} onChange={e => set('title', e.target.value)} style={inputSt} placeholder="e.g. Luxury Villa Interior" onFocus={fo} onBlur={bl} />
+          </div>
+          <div style={fieldSt}>
+            <label style={labelSt}>Subtitle</label>
+            <input value={form.subtitle} onChange={e => set('subtitle', e.target.value)} style={inputSt} placeholder="A short descriptive line shown below the title" onFocus={fo} onBlur={bl} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+            <div>
+              <label style={labelSt}>Location *</label>
+              <input value={form.location} onChange={e => set('location', e.target.value)} style={inputSt} placeholder="Surat, Gujarat" onFocus={fo} onBlur={bl} />
+            </div>
+            <div>
+              <label style={labelSt}>Year *</label>
+              <input type="number" value={form.year} onChange={e => set('year', +e.target.value)} style={inputSt} min={2000} max={2099} onFocus={fo} onBlur={bl} />
+            </div>
+          </div>
+          <div style={fieldSt}>
+            <label style={labelSt}>Category *</label>
+            <select value={form.category} onChange={e => set('category', e.target.value)} style={inputSt}>
+              {PROJECT_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+            </select>
+          </div>
+          <div style={fieldSt}>
+            <label style={labelSt}>Description</label>
+            <textarea value={form.description} onChange={e => set('description', e.target.value)}
+              style={{ ...inputSt, minHeight: 120, resize: 'vertical' }} placeholder="Project description…" onFocus={fo} onBlur={bl} />
+            <p style={{ fontSize: '0.62rem', fontFamily: "'DM Mono', monospace", color: '#4A5A72', marginTop: 4 }}>{form.description.length} of 1000 characters</p>
+          </div>
+          <div style={fieldSt}>
+            <label style={labelSt}>Materials Used (press Enter to add)</label>
+            <TagInput tags={form.materialsUsed} onChange={v => set('materialsUsed', v)} placeholder="e.g. Century BWP Plywood…" maxTags={15} />
+          </div>
+          <div style={fieldSt}>
+            <label style={labelSt}>Display Order</label>
+            <input type="number" value={form.displayOrder} onChange={e => set('displayOrder', +e.target.value)} style={{ ...inputSt, width: 120 }} onFocus={fo} onBlur={bl} />
+          </div>
+
+          {/* Cover Image */}
+          <div style={fieldSt}>
+            <label style={labelSt}>Cover Image</label>
+            {imagePreview ? (
+              <div style={{ position: 'relative', borderRadius: 0 }}>
+                <img src={imagePreview} alt="" style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block', borderRadius: 0 }} />
+                <button onClick={() => fileRef.current?.click()}
+                  style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '8px', background: 'rgba(0,0,0,0.6)', border: 'none', color: '#E8EDF5', fontFamily: "'DM Mono', monospace", fontSize: '0.62rem', letterSpacing: '0.1em', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 0 }}>
+                  <Upload size={12} /> CHANGE IMAGE
+                </button>
+              </div>
+            ) : (
+              <div onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={onDrop}
+                onClick={() => fileRef.current?.click()}
+                style={{ border: `2px dashed ${isDragging ? '#C9A84C' : '#2A3D5C'}`, background: isDragging ? 'rgba(201,168,76,0.05)' : '#151D2E', padding: 32, textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s', borderRadius: 0 }}>
+                <Upload size={24} color={isDragging ? '#C9A84C' : '#4A5A72'} style={{ margin: '0 auto 8px' }} />
+                <p style={{ color: '#7A8BA8', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem' }}>Drag and drop or click to select cover image</p>
+              </div>
+            )}
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={onFileChange} />
+            <p style={{ fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", color: '#4A5A72', marginTop: 6 }}>Recommended: 1200×800px, JPG or PNG</p>
+          </div>
+
+          {/* Toggles */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <Toggle checked={form.isActive} onChange={v => set('isActive', v)} green />
+              <div>
+                <p style={{ margin: 0, fontSize: '0.83rem', color: '#E8EDF5', fontFamily: "'Inter', sans-serif" }}>Visible on Public Site</p>
+                <p style={{ margin: '2px 0 0', fontSize: '0.75rem', fontWeight: 300, color: '#4A5A72', fontFamily: "'Inter', sans-serif" }}>Inactive projects are hidden from visitors</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <Toggle checked={form.isFeatured} onChange={v => set('isFeatured', v)} />
+              <div>
+                <p style={{ margin: 0, fontSize: '0.83rem', color: '#E8EDF5', fontFamily: "'Inter', sans-serif" }}>Featured on Homepage</p>
+                <p style={{ margin: '2px 0 0', fontSize: '0.75rem', fontWeight: 300, color: '#4A5A72', fontFamily: "'Inter', sans-serif" }}>Featured projects appear in the homepage portfolio section</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sticky footer */}
+        <div style={{ padding: '20px 28px', background: '#0F1520', borderTop: '1px solid #1F2D45', flexShrink: 0, display: 'flex', gap: 12 }}>
+          <button onClick={onClose} style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid #2A3D5C', color: '#7A8BA8', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', cursor: 'pointer', borderRadius: 0 }}>CANCEL</button>
+          <button onClick={handleSave} disabled={saving} style={{ flex: 2, padding: '12px', background: '#C9A84C', color: '#0A0F1E', border: 'none', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', opacity: saving ? 0.7 : 1, borderRadius: 0 }}>
+            {saving ? 'SAVING…' : 'SAVE PROJECT'}
+          </button>
+        </div>
+      </motion.div>
+    </>
+  );
+};
+
+/* ── Main Page ─────────────────────────────────────────────────────────── */
 const AdminProjectsPage = () => {
+  const showToast = useToast();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [drawerProject, setDrawerProject] = useState(undefined);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [togglingId, setTogglingId] = useState(null);
+  const [warningDismissed, setWarningDismissed] = useState(() => !!sessionStorage.getItem('proj-warning-dismissed'));
 
-  // Form states
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [title, setTitle] = useState('');
-  const [subtitle, setSubtitle] = useState('');
-  const [location, setLocation] = useState('');
-  const [year, setYear] = useState(new Date().getFullYear());
-  const [category, setCategory] = useState(PROJECT_CATEGORIES[0]);
-  const [description, setDescription] = useState('');
-  const [displayOrder, setDisplayOrder] = useState(0);
-  const [materialsInput, setMaterialsInput] = useState('');
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState('');
-  const [isActive, setIsActive] = useState(true);
-  const [isFeatured, setIsFeatured] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-
-  const fetchProjects = async () => {
+  const fetch = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      setError('');
-      let url = '/projects';
-      const params = [];
-      if (categoryFilter) {
-        params.push(`category=${encodeURIComponent(categoryFilter)}`);
-      }
-      if (params.length > 0) {
-        url += `?${params.join('&')}`;
-      }
+      const res = await adminAxios.get('/projects');
+      setProjects(res.data?.data || []);
+    } catch { showToast('error', 'Failed to load projects'); }
+    finally { setLoading(false); }
+  }, [showToast]);
 
-      const response = await adminAxios.get(url);
-      let list = response.data?.data || [];
+  useEffect(() => { fetch(); }, [fetch]);
 
-      // Filter client-side search query
-      if (search.trim()) {
-        const query = search.toLowerCase();
-        list = list.filter(p => p.title.toLowerCase().includes(query) || p.description?.toLowerCase().includes(query));
-      }
+  const activeCount = useMemo(() => projects.filter(p => p.isActive).length, [projects]);
+  const showWarning = activeCount < 3 && !warningDismissed;
 
-      setProjects(list);
-    } catch (err) {
-      console.error(err);
-      setError('Could not fetch portfolio projects. Verify database engine.');
-    } finally {
-      setLoading(false);
-    }
+  const dismissWarning = () => {
+    sessionStorage.setItem('proj-warning-dismissed', '1');
+    setWarningDismissed(true);
   };
 
-  useEffect(() => {
-    fetchProjects();
-  }, [categoryFilter]);
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    fetchProjects();
-  };
-
-  const openAddModal = () => {
-    setEditingId(null);
-    setTitle('');
-    setSubtitle('');
-    setLocation('');
-    setYear(new Date().getFullYear());
-    setCategory(PROJECT_CATEGORIES[0]);
-    setDescription('');
-    setDisplayOrder(0);
-    setMaterialsInput('');
-    setImageFile(null);
-    setImagePreview('');
-    setIsActive(true);
-    setIsFeatured(false);
-    setIsModalOpen(true);
-  };
-
-  const openEditModal = (project) => {
-    setEditingId(project._id);
-    setTitle(project.title);
-    setSubtitle(project.subtitle || '');
-    setLocation(project.location);
-    setYear(project.year || new Date().getFullYear());
-    setCategory(project.category);
-    setDescription(project.description || '');
-    setDisplayOrder(project.displayOrder || 0);
-    setMaterialsInput(Array.isArray(project.materialsUsed) ? project.materialsUsed.join(', ') : '');
-    setImageFile(null);
-    setImagePreview(project.coverImageUrl || '');
-    setIsActive(project.isActive ?? true);
-    setIsFeatured(project.isFeatured ?? false);
-    setIsModalOpen(true);
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleToggleActive = async (id) => {
+  /* toggle */
+  const handleToggle = async (proj, field) => {
+    setTogglingId(proj._id + field);
     try {
-      const response = await adminAxios.patch(`/projects/${id}/toggle`);
-      if (response.data?.success) {
-        setProjects(prev =>
-          prev.map(p => p._id === id ? { ...p, isActive: !p.isActive } : p)
-        );
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Could not toggle active state.');
-    }
-  };
-
-  const handleDeleteProject = async (id) => {
-    if (!window.confirm('Delete this project permanently?')) return;
-    try {
-      await adminAxios.delete(`/projects/${id}`);
-      setProjects(prev => prev.filter(p => p._id !== id));
-    } catch (err) {
-      console.error(err);
-      alert('Delete project request failed.');
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!title || !location || !year) return;
-
-    setSubmitting(true);
-    setError('');
-
-    const materialsArr = materialsInput.split(',').map(s => s.trim()).filter(Boolean);
-
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('subtitle', subtitle);
-    formData.append('location', location);
-    formData.append('year', year);
-    formData.append('category', category);
-    formData.append('description', description);
-    formData.append('displayOrder', displayOrder);
-    formData.append('isActive', isActive);
-    formData.append('isFeatured', isFeatured);
-    formData.append('materialsUsed', JSON.stringify(materialsArr));
-    if (imageFile) {
-      formData.append('image', imageFile);
-    }
-
-    try {
-      let response;
-      if (editingId) {
-        response = await adminAxios.put(`/projects/${editingId}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+      if (field === 'isActive') {
+        const res = await adminAxios.patch(`/projects/${proj._id}/toggle`);
+        setProjects(prev => prev.map(p => p._id === proj._id ? (res.data?.data || { ...p, isActive: !p.isActive }) : p));
+        showToast('success', `Project ${proj.isActive ? 'deactivated' : 'activated'}`);
       } else {
-        response = await adminAxios.post('/projects', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await adminAxios.put(`/projects/${proj._id}`, { ...proj, isFeatured: !proj.isFeatured });
+        setProjects(prev => prev.map(p => p._id === proj._id ? { ...p, isFeatured: !p.isFeatured } : p));
+        showToast('success', `Featured ${!proj.isFeatured ? 'enabled' : 'disabled'}`);
       }
+    } catch { showToast('error', 'Update failed'); }
+    finally { setTogglingId(null); }
+  };
 
-      if (response.data?.success) {
-        setIsModalOpen(false);
-        fetchProjects();
-      }
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || 'Form submission failed.');
-    } finally {
-      setSubmitting(false);
-    }
+  /* delete */
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await adminAxios.delete(`/projects/${deleteTarget._id}`);
+      setProjects(prev => prev.filter(p => p._id !== deleteTarget._id));
+      showToast('success', 'Project deleted');
+    } catch { showToast('error', 'Delete failed'); }
+    finally { setDeleting(false); setDeleteTarget(null); }
   };
 
   return (
-    <AdminLayout title="Showroom Portfolio Control">
-      {error && (
-        <div className="flex items-center gap-3 p-4 mb-6 rounded-lg bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)] text-xs text-[var(--admin-danger)]">
-          <AlertCircle className="h-5 w-5 shrink-0" />
-          <p>{error}</p>
+    <AdminLayout title="Projects">
+      {/* Warning Banner */}
+      <AnimatePresence>
+        {showWarning && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            style={{ background: 'rgba(243,156,18,0.1)', border: '1px solid rgba(243,156,18,0.3)', padding: '14px 20px', marginBottom: 20, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, borderRadius: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <AlertTriangle size={16} color="#F39C12" style={{ flexShrink: 0, marginTop: 2 }} />
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#F39C12', fontFamily: "'Inter', sans-serif", lineHeight: 1.6 }}>
+                You have fewer than 3 active projects. The homepage portfolio section recommends at least 3 projects for the best appearance.
+              </p>
+            </div>
+            <button onClick={dismissWarning} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8BA8', fontFamily: "'DM Mono', monospace", fontSize: '0.62rem', letterSpacing: '0.08em', flexShrink: 0, whiteSpace: 'nowrap', borderRadius: 0 }}>DISMISS</button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
+        <div>
+          <h1 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#E8EDF5', fontFamily: "'Inter', sans-serif", margin: 0 }}>PROJECT PORTFOLIO</h1>
+          <p style={{ fontSize: '0.82rem', fontWeight: 300, color: '#7A8BA8', fontFamily: "'DM Mono', monospace", marginTop: 4 }}>{activeCount} active projects</p>
         </div>
-      )}
-
-      {/* Control bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between mb-8">
-        <form onSubmit={handleSearchSubmit} className="flex gap-2 flex-1 max-w-md">
-          <div className="relative flex-1">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-[var(--admin-text-secondary)]">
-              <Search className="h-4 w-4" />
-            </span>
-            <input
-              type="text"
-              placeholder="Search projects..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 bg-[var(--admin-bg-card)] border border-[var(--admin-border)] text-sm rounded-lg"
-            />
-          </div>
-          <button type="submit" className="btn-admin-secondary text-sm">
-            Search
-          </button>
-        </form>
-
-        <div className="flex items-center gap-3">
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-[var(--admin-bg-card)] border border-[var(--admin-border)] text-sm rounded-lg py-2.5 px-3"
-          >
-            <option value="">All Categories</option>
-            {PROJECT_CATEGORIES.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+        <div style={{ display: 'flex', gap: 10 }}>
+          {/* View toggle */}
+          <div style={{ display: 'flex', border: '1px solid #2A3D5C', overflow: 'hidden', borderRadius: 0 }}>
+            {[{ m: 'grid', Icon: LayoutGrid }, { m: 'list', Icon: List }].map(({ m, Icon }) => (
+              <button key={m} onClick={() => setViewMode(m)}
+                style={{ padding: '8px 12px', background: viewMode === m ? '#1C2640' : 'transparent', border: 'none', cursor: 'pointer', color: viewMode === m ? '#C9A84C' : '#7A8BA8', display: 'flex', alignItems: 'center', borderRadius: 0 }}>
+                <Icon size={15} />
+              </button>
             ))}
-          </select>
-
-          <button
-            onClick={openAddModal}
-            className="btn-admin-primary flex items-center gap-2 text-sm rounded-lg"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Add Project</span>
+          </div>
+          <button onClick={() => setDrawerProject(null)}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: '#C9A84C', color: '#0A0F1E', border: 'none', fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.1em', cursor: 'pointer', borderRadius: 0 }}
+            onMouseEnter={e => e.currentTarget.style.background = '#D4B866'}
+            onMouseLeave={e => e.currentTarget.style.background = '#C9A84C'}>
+            <PlusCircle size={14} /> ADD PROJECT
           </button>
         </div>
       </div>
 
-      {/* Table view */}
+      {/* Content */}
       {loading ? (
-        <div className="space-y-4 py-6">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-20 rounded-xl bg-[var(--admin-bg-card)] border border-[var(--admin-border)] animate-pulse" />
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[...Array(6)].map((_, i) => <div key={i} style={{ height: 320, background: '#151D2E', animation: 'pulse 1.5s infinite', borderRadius: 0 }} />)}
         </div>
       ) : projects.length === 0 ? (
-        <div className="text-center py-20 bg-[var(--admin-bg-card)] border border-[var(--admin-border)] rounded-xl">
-          <FolderGit2 className="h-12 w-12 mx-auto text-[var(--admin-text-secondary)] opacity-40 mb-4" />
-          <p className="text-sm font-semibold text-[var(--admin-text-primary)]">No projects found.</p>
-          <p className="text-xs text-[var(--admin-text-secondary)] mt-1">Add items to show in the showcase portfolio grid.</p>
+        <div style={{ textAlign: 'center', padding: 80, background: '#151D2E', border: '1px solid #1F2D45', borderRadius: 0 }}>
+          <FolderOpen size={48} color="#4A5A72" style={{ margin: '0 auto 16px' }} />
+          <p style={{ color: '#7A8BA8', fontFamily: "'Inter', sans-serif", fontWeight: 300, marginBottom: 8 }}>No projects yet</p>
+          <p style={{ color: '#4A5A72', fontFamily: "'Inter', sans-serif", fontWeight: 300, fontSize: '0.82rem' }}>Add your first project using the button above.</p>
+        </div>
+      ) : viewMode === 'grid' ? (
+        /* ── Grid View ── */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <AnimatePresence>
+            {projects.map(proj => (
+              <motion.div key={proj._id} layout exit={{ scale: 0.85, opacity: 0 }} transition={{ duration: 0.25 }}
+                style={{ background: '#151D2E', border: '1px solid #1F2D45', overflow: 'hidden', borderRadius: 0 }}
+                className="proj-card-container">
+                {/* Image */}
+                <div style={{ height: 200, position: 'relative', background: '#1C2640', overflow: 'hidden' }}>
+                  {proj.coverImageUrl
+                    ? <img src={proj.coverImageUrl} alt={proj.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: 0 }} />
+                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FolderOpen size={36} color="#4A5A72" /></div>
+                  }
+                  {/* Overlay on hover */}
+                  <div className="proj-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(8,12,20,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, opacity: 0, transition: 'opacity 0.25s' }}>
+                    <button onClick={() => setDrawerProject(proj)} style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(15,21,32,0.9)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#E8EDF5' }}><Edit3 size={20} /></button>
+                    <button onClick={() => setDeleteTarget(proj)} style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(15,21,32,0.9)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#E74C3C' }}><Trash2 size={20} /></button>
+                  </div>
+                  <style>{`.proj-card-container:hover .proj-overlay { opacity: 1 !important; }`}</style>
+                </div>
+
+                {/* Body */}
+                <div style={{ padding: '18px 20px' }}>
+                  <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 500, color: '#E8EDF5', fontFamily: "'Inter', sans-serif" }}>{proj.title}</p>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', margin: '6px 0 10px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.65rem', color: '#7A8BA8', fontFamily: "'DM Mono', monospace", display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <MapPin size={11} />{proj.location}
+                    </span>
+                    <span style={{ fontSize: '0.65rem', color: '#7A8BA8', fontFamily: "'DM Mono', monospace" }}>{proj.year}</span>
+                  </div>
+                  <span style={{ background: '#1C2640', color: '#C9A84C', fontSize: '0.58rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.12em', textTransform: 'uppercase', padding: '3px 8px', display: 'inline-block', marginBottom: 14, borderRadius: 0 }}>
+                    {PROJECT_CATEGORIES.find(c => c.value === proj.category)?.label || proj.category}
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {togglingId === proj._id + 'isActive' ? (
+                        <RefreshCw size={12} className="animate-spin-custom" color="#2ECC71" />
+                      ) : (
+                        <Toggle checked={proj.isActive} onChange={() => handleToggle(proj, 'isActive')} green />
+                      )}
+                      <span style={{ fontSize: '0.65rem', color: proj.isActive ? '#2ECC71' : '#7A8BA8', fontFamily: "'DM Mono', monospace" }}>{proj.isActive ? 'ACTIVE' : 'INACTIVE'}</span>
+                    </div>
+                    {togglingId === proj._id + 'isFeatured' ? (
+                      <RefreshCw size={14} className="animate-spin-custom" color="#C9A84C" />
+                    ) : (
+                      <button onClick={() => handleToggle(proj, 'isFeatured')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, transition: 'transform 0.2s', borderRadius: 0 }}
+                        title={proj.isFeatured ? 'Remove featured' : 'Mark featured'}
+                        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
+                        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                        <Star size={16} color={proj.isFeatured ? '#C9A84C' : '#4A5A72'} fill={proj.isFeatured ? '#C9A84C' : 'none'} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       ) : (
-        <div className="admin-table-container shadow-xl">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Cover</th>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Location / Year</th>
-                <th>Featured</th>
-                <th>Status</th>
-                <th className="text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map((proj) => (
-                <tr key={proj._id}>
-                  <td className="w-20">
-                    {proj.coverImageUrl ? (
-                      <img
-                        src={proj.coverImageUrl}
-                        alt={proj.title}
-                        className="w-12 h-12 rounded bg-[var(--admin-bg-deep)] border border-[var(--admin-border)] object-cover"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded bg-[var(--admin-bg-elevated)] border border-[var(--admin-border)] flex items-center justify-center text-xs text-[var(--admin-text-secondary)]">
-                        No image
-                      </div>
-                    )}
-                  </td>
-                  <td>
-                    <div className="font-semibold text-[var(--admin-text-primary)]">{proj.title}</div>
-                    <div className="text-xs text-[var(--admin-text-secondary)] truncate max-w-xs mt-0.5">{proj.subtitle}</div>
-                  </td>
-                  <td>
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded bg-[var(--admin-bg-elevated)] border border-[var(--admin-border)] text-[var(--admin-accent)]">
-                      {proj.category}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="text-[var(--admin-text-primary)] text-sm flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5 text-[var(--admin-text-secondary)]" />
-                      <span>{proj.location}</span>
-                    </div>
-                    <div className="text-xs text-[var(--admin-text-secondary)] flex items-center gap-1 mt-0.5">
-                      <Calendar className="h-3 w-3" />
-                      <span>{proj.year || 'N/A'}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span className={`inline-flex items-center gap-1 text-xs font-semibold ${
-                      proj.isFeatured ? 'text-[var(--admin-accent)]' : 'text-[var(--admin-text-secondary)]/50'
-                    }`}>
-                      <Star className={`h-4.5 w-4.5 ${proj.isFeatured ? 'fill-current' : ''}`} />
-                      <span>{proj.isFeatured ? 'Featured' : 'Standard'}</span>
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      onClick={() => handleToggleActive(proj._id)}
-                      className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full transition ${
-                        proj.isActive
-                          ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
-                          : 'bg-red-500/10 text-[var(--admin-danger)] hover:bg-red-500/20'
-                      }`}
-                    >
-                      {proj.isActive ? (
-                        <>
-                          <Eye className="h-3.5 w-3.5" />
-                          <span>Active</span>
-                        </>
-                      ) : (
-                        <>
-                          <EyeOff className="h-3.5 w-3.5" />
-                          <span>Hidden</span>
-                        </>
-                      )}
-                    </button>
-                  </td>
-                  <td className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => openEditModal(proj)}
-                        className="p-1.5 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg-card)] text-[var(--admin-text-primary)] hover:bg-[var(--admin-bg-elevated)] transition"
-                        title="Edit project"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProject(proj._id)}
-                        className="p-1.5 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg-card)] hover:bg-red-500/10 text-[var(--admin-danger)] transition"
-                        title="Delete project"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
+        /* ── List View ── */
+        <div style={{ background: '#151D2E', border: '1px solid #1F2D45', overflow: 'hidden', borderRadius: 0 }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #1F2D45', background: '#0F1520' }}>
+                  {['IMAGE', 'TITLE', 'LOCATION', 'YEAR', 'CATEGORY', 'ACTIVE', 'FEATURED', 'ACTIONS'].map(h => (
+                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.12em', color: '#4A5A72', fontWeight: 600 }}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                <AnimatePresence>
+                  {projects.map(proj => (
+                    <motion.tr key={proj._id} layout exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }}
+                      style={{ borderBottom: '1px solid #1F2D45', transition: 'background 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#1C2640'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <td style={{ padding: '12px 16px' }}>
+                        {proj.coverImageUrl
+                          ? <img src={proj.coverImageUrl} alt="" style={{ width: 56, height: 56, objectFit: 'cover', display: 'block', borderRadius: 0 }} />
+                          : <div style={{ width: 56, height: 56, background: '#1C2640', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 0 }}><FolderOpen size={20} color="#4A5A72" /></div>
+                        }
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 500, color: '#E8EDF5', fontFamily: "'Inter', sans-serif" }}>{proj.title}</p>
+                        {proj.subtitle && <p style={{ margin: '3px 0 0', fontSize: '0.75rem', fontWeight: 300, color: '#7A8BA8', fontFamily: "'Inter', sans-serif" }}>{proj.subtitle}</p>}
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#7A8BA8', fontFamily: "'DM Mono', monospace" }}>{proj.location}</td>
+                      <td style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#7A8BA8', fontFamily: "'DM Mono', monospace" }}>{proj.year}</td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <span style={{ background: '#1C2640', color: '#C9A84C', fontSize: '0.58rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 0 }}>
+                          {PROJECT_CATEGORIES.find(c => c.value === proj.category)?.label || proj.category}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        {togglingId === proj._id + 'isActive' ? (
+                          <RefreshCw size={12} className="animate-spin-custom" color="#2ECC71" />
+                        ) : (
+                          <Toggle checked={proj.isActive} onChange={() => handleToggle(proj, 'isActive')} green />
+                        )}
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        {togglingId === proj._id + 'isFeatured' ? (
+                          <RefreshCw size={14} className="animate-spin-custom" color="#C9A84C" />
+                        ) : (
+                          <button onClick={() => handleToggle(proj, 'isFeatured')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, borderRadius: 0 }}>
+                            <Star size={16} color={proj.isFeatured ? '#C9A84C' : '#4A5A72'} fill={proj.isFeatured ? '#C9A84C' : 'none'} />
+                          </button>
+                        )}
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={() => setDrawerProject(proj)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8BA8', display: 'flex', padding: 4, borderRadius: 0 }}><Edit3 size={16} /></button>
+                          <button onClick={() => setDeleteTarget(proj)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8BA8', display: 'flex', padding: 4, transition: 'color 0.2s', borderRadius: 0 }}
+                            onMouseEnter={e => e.currentTarget.style.color = '#E74C3C'}
+                            onMouseLeave={e => e.currentTarget.style.color = '#7A8BA8'}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </AnimatePresence>
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
-      {/* Edit / Add Modal Form */}
+      {/* Drawer */}
       <AnimatePresence>
-        {isModalOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsModalOpen(false)}
-              className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
-            >
-              {/* Modal Card */}
-              <motion.div
-                initial={{ scale: 0.95, y: 15 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.95, y: 15 }}
-                onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-xl bg-[var(--admin-bg-card)] border border-[var(--admin-border)] rounded-2xl overflow-hidden shadow-2xl relative"
-              >
-                {/* Header Title */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--admin-border)] bg-[var(--admin-bg-elevated)]/30">
-                  <h3 className="font-bold text-[var(--admin-text-primary)] text-lg">
-                    {editingId ? 'Edit Project Details' : 'Add New Portfolio Project'}
-                  </h3>
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="p-1 rounded-md text-[var(--admin-text-secondary)] hover:bg-[var(--admin-bg-elevated)] hover:text-[var(--admin-text-primary)] transition"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
+        {drawerProject !== undefined && (
+          <ProjectDrawer
+            key={drawerProject?._id || 'new'}
+            project={drawerProject}
+            onClose={() => setDrawerProject(undefined)}
+            onSaved={() => { fetch(); setDrawerProject(undefined); }}
+          />
+        )}
+      </AnimatePresence>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-                  {/* Title field */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[var(--admin-text-secondary)] tracking-wide uppercase">
-                      Project Title *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Surat Luxury Penthouse"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className="w-full bg-[var(--admin-bg-primary)] border border-[var(--admin-border)] text-sm rounded-lg"
-                    />
-                  </div>
-
-                  {/* Subtitle field */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[var(--admin-text-secondary)] tracking-wide uppercase">
-                      Subtitle / Brief Line
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Modern minimalist design with custom veneered spaces"
-                      value={subtitle}
-                      onChange={(e) => setSubtitle(e.target.value)}
-                      className="w-full bg-[var(--admin-bg-primary)] border border-[var(--admin-border)] text-sm rounded-lg"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Location field */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-[var(--admin-text-secondary)] tracking-wide uppercase">
-                        Location *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Surat, Gujarat"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        className="w-full bg-[var(--admin-bg-primary)] border border-[var(--admin-border)] text-sm rounded-lg"
-                      />
-                    </div>
-
-                    {/* Year field */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-[var(--admin-text-secondary)] tracking-wide uppercase">
-                        Project Year *
-                      </label>
-                      <input
-                        type="number"
-                        required
-                        placeholder="e.g. 2024"
-                        value={year}
-                        onChange={(e) => setYear(parseInt(e.target.value, 10) || new Date().getFullYear())}
-                        className="w-full bg-[var(--admin-bg-primary)] border border-[var(--admin-border)] text-sm rounded-lg"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Category field */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-[var(--admin-text-secondary)] tracking-wide uppercase">
-                        Category
-                      </label>
-                      <select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="w-full bg-[var(--admin-bg-primary)] border border-[var(--admin-border)] text-sm rounded-lg"
-                      >
-                        {PROJECT_CATEGORIES.map(cat => (
-                          <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Display Order */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-[var(--admin-text-secondary)] tracking-wide uppercase">
-                        Display Order
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="0"
-                        value={displayOrder}
-                        onChange={(e) => setDisplayOrder(parseInt(e.target.value, 10) || 0)}
-                        className="w-full bg-[var(--admin-bg-primary)] border border-[var(--admin-border)] text-sm rounded-lg"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Description field */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[var(--admin-text-secondary)] tracking-wide uppercase">
-                      Description / Case Study
-                    </label>
-                    <textarea
-                      rows={3}
-                      placeholder="Discuss project requirements, architects, and custom material features used..."
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      className="w-full bg-[var(--admin-bg-primary)] border border-[var(--admin-border)] text-sm rounded-lg"
-                    />
-                  </div>
-
-                  {/* Materials list */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[var(--admin-text-secondary)] tracking-wide uppercase flex items-center justify-between">
-                      <span>Materials Used</span>
-                      <span className="text-[10px] lowercase italic font-normal">Separate with commas</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. BWP Blockboard, Teak Veneer, Blum Hinge hardware"
-                      value={materialsInput}
-                      onChange={(e) => setMaterialsInput(e.target.value)}
-                      className="w-full bg-[var(--admin-bg-primary)] border border-[var(--admin-border)] text-sm rounded-lg"
-                    />
-                  </div>
-
-                  {/* Image selection */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[var(--admin-text-secondary)] tracking-wide uppercase">
-                      Project Cover Image
-                    </label>
-                    <div className="flex gap-4 items-center">
-                      <div className="flex-1">
-                        <label className="flex flex-col items-center justify-center p-4 border border-dashed border-[var(--admin-border)] rounded-lg cursor-pointer bg-[var(--admin-bg-primary)] hover:bg-[var(--admin-bg-elevated)]/30 transition text-center gap-1.5">
-                          <Upload className="h-5 w-5 text-[var(--admin-text-secondary)]" />
-                          <span className="text-xs font-medium text-[var(--admin-text-primary)]">Select cover photo</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className="hidden"
-                          />
-                        </label>
-                      </div>
-
-                      {imagePreview && (
-                        <div className="relative w-24 h-24 border border-[var(--admin-border)] rounded-lg bg-[var(--admin-bg-primary)] overflow-hidden shrink-0">
-                          <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                          <button
-                            type="button"
-                            onClick={() => { setImageFile(null); setImagePreview(''); }}
-                            className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-black text-[var(--admin-text-primary)] rounded-full transition"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Checks togglers */}
-                  <div className="grid grid-cols-2 gap-4 pt-2">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="isFeaturedToggle"
-                        checked={isFeatured}
-                        onChange={(e) => setIsFeatured(e.target.checked)}
-                        className="w-4 h-4 text-[var(--admin-accent)] bg-[var(--admin-bg-primary)] border-[var(--admin-border)] rounded focus:ring-0"
-                      />
-                      <label htmlFor="isFeaturedToggle" className="text-xs font-semibold text-[var(--admin-text-primary)] cursor-pointer">
-                        Pin to Featured slider
-                      </label>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="isActiveToggle"
-                        checked={isActive}
-                        onChange={(e) => setIsActive(e.target.checked)}
-                        className="w-4 h-4 text-[var(--admin-accent)] bg-[var(--admin-bg-primary)] border-[var(--admin-border)] rounded focus:ring-0"
-                      />
-                      <label htmlFor="isActiveToggle" className="text-xs font-semibold text-[var(--admin-text-primary)] cursor-pointer">
-                        Show on public site
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Submit buttons */}
-                  <div className="flex justify-end gap-3 pt-4 border-t border-[var(--admin-border)]">
-                    <button
-                      type="button"
-                      onClick={() => setIsModalOpen(false)}
-                      className="btn-admin-secondary text-sm"
-                      disabled={submitting}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn-admin-primary text-sm font-semibold"
-                      disabled={submitting}
-                    >
-                      {submitting ? 'Saving changes...' : 'Save Project'}
-                    </button>
-                  </div>
-                </form>
-              </motion.div>
-            </motion.div>
-          </>
+      {/* Delete Dialog */}
+      <AnimatePresence>
+        {deleteTarget && (
+          <DeleteDialog name={deleteTarget.title} onCancel={() => setDeleteTarget(null)} onConfirm={handleDelete} loading={deleting} />
         )}
       </AnimatePresence>
     </AdminLayout>

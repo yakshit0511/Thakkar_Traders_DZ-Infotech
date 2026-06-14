@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: thakkar-traders-api
+    runtime: node
+    # Root directory of the server code inside the repo
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000          # Render assigns its own port via $PORT; this is a fallback hint
+      - key: MONGO_URI
+        sync: false           # Set manually in the Render dashboard
+      - key: JWT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLIENT_URL
+        sync: false           # Set to your Vercel frontend URL after deploying client
+      - key: RESEND_API_KEY
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false

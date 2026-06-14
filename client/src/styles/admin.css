@@ -35,6 +35,18 @@
   transition: all 0.2s ease;
 }
 
+.admin-theme input.pl-9 {
+  padding-left: 2.25rem !important;
+}
+
+.admin-theme input.pl-10 {
+  padding-left: 2.5rem !important;
+}
+
+.admin-theme input.pr-10 {
+  padding-right: 2.5rem !important;
+}
+
 .admin-theme input:focus,
 .admin-theme textarea:focus,
 .admin-theme select:focus {
@@ -42,6 +54,7 @@
   border-color: var(--admin-accent);
   box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.15);
 }
+
 
 .admin-theme button {
   font-family: 'Inter', sans-serif !important;

@@ -61,13 +61,15 @@ const AdminLoginPage = () => {
         <div className="absolute w-[300px] h-[300px] rounded-full bg-[var(--admin-accent)]/5 blur-[80px] top-[-50px] left-[-50px]" />
         
         {/* Top Header */}
-        <div className="flex items-center gap-3 relative z-10">
-          <div className="w-10 h-10 rounded-xl bg-[var(--admin-bg-elevated)] border border-[var(--admin-border)] flex items-center justify-center shadow-lg">
-            <span className="text-lg font-bold text-[var(--admin-accent)]">TT</span>
-          </div>
-          <div>
-            <h1 className="text-sm font-bold tracking-wider text-[var(--admin-text-primary)]">THAKKAR TRADERS</h1>
-            <p className="text-[10px] font-medium text-[var(--admin-text-secondary)] tracking-widest">PORTAL ACCESS</p>
+        <div className="flex items-center gap-4 relative z-10">
+          <img
+            src="/thakkar-logo-transparent.png"
+            className="h-14 w-auto object-contain"
+            style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.12)) brightness(1.1)' }}
+            alt="Thakkar Traders Logo"
+          />
+          <div className="border-l border-[var(--admin-border)] pl-4 py-1">
+            <p className="text-[10px] font-bold text-[var(--admin-accent)] tracking-widest uppercase">Portal Access</p>
           </div>
         </div>
 
@@ -107,14 +109,19 @@ const AdminLoginPage = () => {
           transition={{ duration: 0.4 }}
           className="w-full max-w-md bg-[var(--admin-bg-card)] border border-[var(--admin-border)] rounded-2xl p-8 md:p-10 shadow-2xl shadow-black/60 relative"
         >
-          {/* Mobile Monogram Logo Header */}
+          {/* Mobile Logo Header */}
           <div className="flex md:hidden flex-col items-center mb-8 text-center">
-            <div className="w-12 h-12 rounded-xl bg-[var(--admin-bg-elevated)] border border-[var(--admin-border)] flex items-center justify-center shadow-lg mb-3">
-              <span className="text-xl font-bold text-[var(--admin-accent)]">TT</span>
-            </div>
-            <h1 className="text-lg font-bold tracking-wider text-[var(--admin-text-primary)]">THAKKAR TRADERS</h1>
-            <p className="text-xs font-medium text-[var(--admin-text-secondary)] tracking-widest uppercase">Admin Workspace</p>
+            <img
+              src="/thakkar-logo-transparent.png"
+              className="h-14 w-auto object-contain mb-3"
+              style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.12)) brightness(1.1)' }}
+              alt="Thakkar Traders Logo"
+            />
+            <p className="text-[10px] font-semibold text-[var(--admin-accent)] tracking-widest uppercase pl-[0.2em]">
+              Admin Workspace
+            </p>
           </div>
+
 
           <div className="hidden md:block mb-8">
             <h3 className="text-2xl font-bold tracking-tight text-[var(--admin-text-primary)]">

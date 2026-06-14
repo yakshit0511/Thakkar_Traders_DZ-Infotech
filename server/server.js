@@ -28,12 +28,28 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Health check — helps diagnose env var issues on Render
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      ADMIN_USERNAME_SET: !!process.env.ADMIN_USERNAME,
+      ADMIN_PASSWORD_SET: !!process.env.ADMIN_PASSWORD,
+      MONGODB_URI_SET: !!process.env.MONGODB_URI,
+      JWT_SECRET_SET: !!process.env.JWT_SECRET,
+      CLIENT_URL: process.env.CLIENT_URL,
+    },
+  });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/settings', settingsRoutes);
+
 
 app.use('/api/*', (req, res) => {
   res.status(404).json({

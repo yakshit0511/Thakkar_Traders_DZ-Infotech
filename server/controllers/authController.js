@@ -21,13 +21,18 @@ const login = async (req, res, next) => {
       });
     }
 
-    const adminUsername = process.env.ADMIN_USERNAME || '';
-    const adminPassword = process.env.ADMIN_PASSWORD || '';
+    const adminUsername = (process.env.ADMIN_USERNAME || '').trim();
+    const adminPassword = (process.env.ADMIN_PASSWORD || '').trim();
 
-    const usernameMatch = safeCompare(username, adminUsername);
-    const passwordMatch = safeCompare(password, adminPassword);
+    // Trim input too — prevents copy-paste whitespace issues
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+
+    const usernameMatch = safeCompare(trimmedUsername, adminUsername);
+    const passwordMatch = safeCompare(trimmedPassword, adminPassword);
 
     if (!usernameMatch || !passwordMatch) {
+      console.log(`[AUTH] Login failed — username match: ${usernameMatch}, password match: ${passwordMatch}`);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials',

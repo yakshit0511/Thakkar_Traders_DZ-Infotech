@@ -18,7 +18,17 @@ const AdminLoginPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/admin/dashboard');
+      const status = err.response?.status;
+
+      if (status === 401) {
+        setError('Invalid credentials. Please try again.');
+      } else if (status === 404) {
+        setError('Admin API endpoint not found. Check the backend URL and deployment routing.');
+      } else if (!err.response) {
+        setError('Cannot reach the admin API. Check VITE_API_URL and the backend deployment.');
+      } else {
+        setError(err.response?.data?.message || 'Login failed. Please try again.');
+      }
     }
   }, [isAuthenticated, navigate]);
 

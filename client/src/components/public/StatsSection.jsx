@@ -17,35 +17,15 @@ const DEFAULT_STATS = {
 };
 
 const STAT_ITEMS = [
-  {
-    key: 'totalSheetsDelivered',
-    label: 'SHEETS DELIVERED',
-    description: 'Across residential, commercial and hospitality projects',
-    showPlus: true,
-  },
-  {
-    key: 'totalProjectsServed',
-    label: 'PROJECTS SERVED',
-    description: 'Architects, builders and interior designers',
-    showPlus: true,
-  },
-  {
-    key: 'yearsLegacy',
-    label: 'YEARS LEGACY',
-    description: 'Of curated material expertise in India',
-    showPlus: true,
-  },
-  {
-    key: 'totalBrands',
-    label: 'PREMIUM BRANDS',
-    description: 'Authorized and vetted for consistent quality',
-    showPlus: true,
-  },
+  { key: 'totalSheetsDelivered', label: 'SHEETS DELIVERED', description: 'Across residential, commercial and hospitality projects', showPlus: true, icon: '📦' },
+  { key: 'totalProjectsServed', label: 'PROJECTS SERVED', description: 'Architects, builders and interior designers', showPlus: true, icon: '🏗️' },
+  { key: 'yearsLegacy', label: 'YEARS LEGACY', description: 'Of curated material expertise in India', showPlus: true, icon: '🏆' },
+  { key: 'totalBrands', label: 'PREMIUM BRANDS', description: 'Authorized and vetted for consistent quality', showPlus: true, icon: '✦' },
 ];
 
 const StatItem = ({ stat, target, delay, isActive }) => {
   const [shouldCount, setShouldCount] = useState(false);
-  const count = useCountUp(target, 2000, shouldCount);
+  const count = useCountUp(target, 2200, shouldCount);
 
   useEffect(() => {
     if (!isActive) return undefined;
@@ -57,15 +37,16 @@ const StatItem = ({ stat, target, delay, isActive }) => {
     <motion.div
       variants={counterVariant}
       transition={{ delay }}
-      className="flex flex-1 flex-col items-center px-4 py-6 text-center sm:border-r sm:border-[#2A3147] sm:py-0 last:sm:border-r-0 max-sm:border-b max-sm:border-[#2A3147] max-sm:last:border-b-0"
+      className="flex flex-1 flex-col items-center px-6 py-8 text-center sm:border-r sm:border-[#DED8CC] sm:py-0 last:sm:border-r-0 max-sm:border-b max-sm:border-[#DED8CC] max-sm:last:border-b-0"
     >
-      <p className="font-display text-[clamp(3rem,6vw,6.5rem)] font-light leading-none text-[#C9A84C]">
+      <span className="mb-4 text-2xl opacity-70" aria-hidden="true">{stat.icon}</span>
+      <p className="font-display text-[clamp(3.2rem,6.5vw,7rem)] font-light leading-none text-[#C89B4A]">
         {formatStatNumber(count, stat.showPlus)}
       </p>
-      <p className="mt-4 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-[#8A8A7A]">
+      <p className="mt-4 font-mono text-[0.63rem] uppercase tracking-[0.22em] text-[#6B6B6B]">
         {stat.label}
       </p>
-      <p className="mt-2 max-w-[200px] font-body text-[0.8rem] font-light text-[#5A5A7A]">
+      <p className="mt-2 max-w-[200px] font-body text-[0.82rem] font-light text-[#9A9A8C]">
         {stat.description}
       </p>
     </motion.div>
@@ -89,18 +70,15 @@ const StatsSection = () => {
             totalBrands: data.data.totalBrands ?? DEFAULT_STATS.totalBrands,
           });
         }
-      } catch {
-        /* use defaults */
-      }
+      } catch { /* use defaults */ }
     };
-
     fetchSettings();
   }, []);
 
   return (
     <section
       id="stats"
-      className="bg-[#0D1220] px-6 py-[72px] md:px-8 lg:px-12 lg:py-[100px]"
+      className="bg-[#F5F1EA] border-t border-b border-[#DED8CC] px-6 py-[80px] md:px-8 lg:px-12 lg:py-[110px]"
     >
       <div className="mx-auto max-w-[1400px]">
         <motion.div
@@ -109,11 +87,11 @@ const StatsSection = () => {
           animate={headerControls}
           variants={fadeUpVariant}
         >
-          <p className="section-label">03 / BY THE NUMBERS</p>
-          <h2 className="display-heading mt-4 text-[clamp(2rem,3vw,3.2rem)] italic text-[#F5F0E8]">
+          <p className="section-label text-[#C89B4A]">03 / BY THE NUMBERS</p>
+          <h2 className="display-heading mt-4 text-[clamp(2.2rem,3.2vw,3.5rem)] italic text-[#2F2F2F]">
             Built on consistency.
           </h2>
-          <div className="mt-10 mb-14 h-px w-full bg-[#2A3147]" />
+          <div className="mt-10 mb-14 h-px w-full bg-[#DED8CC]" />
         </motion.div>
 
         <motion.div

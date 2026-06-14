@@ -1,147 +1,154 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Linkedin, Facebook, MapPin, Phone, Mail } from 'lucide-react';
-import api from '../../utils/api';
-import Logo from './Logo';
 
-const DEFAULT_SETTINGS = {
-  showroomAddress: 'Plot 12, Industrial Hub, Surat, Gujarat 395004, India',
-  phone: '+91 98765 43210',
-  email: 'inquiry@thakkartraders.com',
-  workingHours: 'Mon — Sat, 09:30 — 19:00 IST',
-  instagramUrl: '',
-  linkedinUrl: '',
-  facebookUrl: '',
-};
+const CATALOGUE_LINKS = [
+  { label: 'Natural Veneers', path: '/products?category=veneers' },
+  { label: 'BWP Plywood', path: '/products?category=plywood' },
+  { label: 'MDF and HDHMR', path: '/products?category=mdf-hdhmr' },
+  { label: 'Designer Hardware', path: '/products?category=hardware' },
+  { label: 'Flush Doors', path: '/products?category=flush-doors' },
+  { label: 'Designer Laminates', path: '/products?category=laminates' },
+];
 
-const FOOTER_LINKS = [
-  { label: 'About', path: '/#about' },
-  { label: 'Products', path: '/#products' },
-  { label: 'Brands', path: '/#brands' },
-  { label: 'Projects', path: '/#projects' },
-  { label: 'Gallery', path: '/gallery' },
-  { label: 'Contact', path: '/contact' },
+const STUDIO_LINKS = [
+  { label: 'Request Quote', id: 'quote' },
+  { label: 'About Us', id: 'about' },
+  { label: 'Projects', id: 'projects' },
+  { label: 'Contact', id: 'contact' },
 ];
 
 const Footer = () => {
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
 
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const { data } = await api.get('/settings');
-        if (data.success && data.data) {
-          setSettings((prev) => ({ ...prev, ...data.data }));
-        }
-      } catch {
-        /* use defaults */
-      }
-    };
-    fetchSettings();
-  }, []);
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setSubscribed(true);
+    setEmail('');
+    setTimeout(() => setSubscribed(false), 3000);
+  };
+
+  const handleLinkClick = (id, e) => {
+    const el = document.getElementById(id);
+    if (el) {
+      e.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.location.hash = id;
+    }
+  };
 
   return (
-    <footer className="border-t border-[rgba(201,168,76,0.2)] bg-black">
-      <div className="mx-auto max-w-[1400px] px-6 py-14 md:px-8 lg:px-12 lg:py-16">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-          <div className="lg:col-span-1">
-            <Logo imageClassName="h-14 w-auto" />
-            <p className="mt-4 font-body text-[0.85rem] font-light leading-relaxed text-[#8A8A7A]">
-              Authorized distributors of premium plywood, laminates, veneers, MDF, HDHMR boards,
-              flush doors and hardware in Surat, Gujarat.
-            </p>
-          </div>
+    <footer className="border-t border-[#DED8CC] bg-[#ECE6DC] select-none">
+      <div className="mx-auto max-w-[1400px] px-6 pt-20 pb-0 sm:px-8 lg:px-12">
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[40%_25%_25%] gap-12 lg:gap-x-[10%]">
 
-          <div>
-            <p className="section-label mb-4">Quick Links</p>
-            <ul className="space-y-2">
-              {FOOTER_LINKS.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    to={link.path}
-                    className="font-body text-[0.85rem] text-[#8A8A7A] no-underline transition-colors duration-300 hover:text-[#C9A84C]"
+          {/* Left Column: Brand & Newsletter */}
+          <div className="flex flex-col items-start">
+            {/* Logo */}
+            <Link to="/" className="inline-flex items-center no-underline" aria-label="Thakkar Traders — Home">
+              <img
+                src="/thakkar-logo-transparent.png"
+                className="h-[80px] w-auto object-contain"
+                style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.1)) brightness(1.04)' }}
+                alt="Thakkar Traders Logo"
+              />
+            </Link>
+
+            {/* Tagline */}
+            <p className="mt-5 font-body font-light text-[0.875rem] text-[#6B6B6B] leading-[1.75] max-w-sm">
+              Curated material supply for exceptional interiors. Premium plywood, laminates,
+              veneers, MDF and hardware — backed by 15+ years of trade trust.
+            </p>
+
+            {/* Newsletter */}
+            <div className="mt-8 w-full max-w-sm min-h-[46px]">
+              {subscribed ? (
+                <div className="flex items-center h-[46px] border border-[#C89B4A]/30 bg-[#FEFCF8] px-4">
+                  <span className="font-mono text-[0.64rem] tracking-[0.1em] text-[#C89B4A] uppercase">
+                    THANK YOU FOR SUBSCRIBING
+                  </span>
+                </div>
+              ) : (
+                <form onSubmit={handleSubscribe} className="flex w-full">
+                  <input
+                    type="email"
+                    required
+                    placeholder="YOUR EMAIL"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="flex-1 bg-[#FEFCF8] border border-[#DED8CC] px-4 py-3 font-mono text-[0.64rem] tracking-[0.1em] text-[#2F2F2F] placeholder:text-[#9A9A8C]/60 focus:border-[#C89B4A] focus:outline-none transition-colors duration-200"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-[#C89B4A] text-white px-5 py-3 font-body font-medium text-[0.72rem] tracking-[0.1em] transition-colors duration-300 hover:bg-[#A8732A]"
                   >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <p className="section-label mb-4">Contact</p>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-3 font-body text-[0.85rem] text-[#8A8A7A]">
-                <MapPin size={16} className="mt-0.5 shrink-0 text-[#C9A84C]" />
-                {settings.showroomAddress}
-              </li>
-              <li className="flex items-center gap-3 font-body text-[0.85rem] text-[#8A8A7A]">
-                <Phone size={16} className="shrink-0 text-[#C9A84C]" />
-                {settings.phone}
-              </li>
-              <li className="flex items-center gap-3 font-body text-[0.85rem] text-[#8A8A7A]">
-                <Mail size={16} className="shrink-0 text-[#C9A84C]" />
-                {settings.email}
-              </li>
-            </ul>
-            <p className="mt-4 font-mono text-[0.65rem] tracking-[0.12em] text-[#5A5A7A]">
-              {settings.workingHours}
-            </p>
-          </div>
-
-          <div>
-            <p className="section-label mb-4">Follow Us</p>
-            <div className="flex gap-4">
-              {settings.instagramUrl && (
-                <a
-                  href={settings.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#8A8A7A] transition-colors hover:text-[#C9A84C]"
-                  aria-label="Instagram"
-                >
-                  <Instagram size={20} />
-                </a>
-              )}
-              {settings.linkedinUrl && (
-                <a
-                  href={settings.linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#8A8A7A] transition-colors hover:text-[#C9A84C]"
-                  aria-label="LinkedIn"
-                >
-                  <Linkedin size={20} />
-                </a>
-              )}
-              {settings.facebookUrl && (
-                <a
-                  href={settings.facebookUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#8A8A7A] transition-colors hover:text-[#C9A84C]"
-                  aria-label="Facebook"
-                >
-                  <Facebook size={20} />
-                </a>
+                    SUBSCRIBE
+                  </button>
+                </form>
               )}
             </div>
-            <a
-              href="#quote-form"
-              className="mt-6 inline-block border border-[#C9A84C] px-5 py-2.5 font-body text-[0.7rem] font-medium tracking-[0.12em] text-[#C9A84C] no-underline transition-colors duration-300 hover:bg-[#C9A84C] hover:text-black"
-            >
-              REQUEST QUOTE
-            </a>
+          </div>
+
+          {/* Center Column: Catalogue */}
+          <div className="flex flex-col items-start">
+            <span className="font-mono text-[0.64rem] tracking-[0.22em] uppercase text-[#9A9A8C] mb-6">
+              CATALOGUE
+            </span>
+            <div className="flex flex-col gap-4">
+              {CATALOGUE_LINKS.map((link) => (
+                <Link
+                  key={link.label}
+                  to={link.path}
+                  className="font-body font-light text-[0.875rem] text-[#6B6B6B] hover:text-[#C89B4A] transition-all duration-250 hover:translate-x-1 no-underline"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Column: Studio */}
+          <div className="flex flex-col items-start">
+            <span className="font-mono text-[0.64rem] tracking-[0.22em] uppercase text-[#9A9A8C] mb-6">
+              STUDIO
+            </span>
+            <div className="flex flex-col gap-4">
+              {STUDIO_LINKS.map((link) => (
+                <a
+                  key={link.label}
+                  href={`#${link.id}`}
+                  onClick={(e) => handleLinkClick(link.id, e)}
+                  className="font-body font-light text-[0.875rem] text-[#6B6B6B] hover:text-[#C89B4A] transition-all duration-250 hover:translate-x-1 no-underline"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[#2A3147] pt-8 sm:flex-row">
-          <p className="font-mono text-[0.65rem] tracking-[0.12em] text-[#5A5A7A]">
-            © {new Date().getFullYear()} Thakkar Traders. All rights reserved.
-          </p>
-          <p className="font-mono text-[0.65rem] tracking-[0.12em] text-[#5A5A7A]">
-            Surat, Gujarat · Est. 2009
-          </p>
+        {/* Bottom bar */}
+        <div className="mt-16 border-t border-[#DED8CC] py-6 flex flex-col md:flex-row justify-between items-center gap-3">
+          <span className="font-mono text-[0.64rem] tracking-[0.08em] text-[#9A9A8C]">
+            © 2026 THAKKAR TRADERS. ALL RIGHTS RESERVED.
+          </span>
+          <div className="flex gap-6">
+            <Link
+              to="/privacy"
+              className="font-mono text-[0.64rem] tracking-[0.08em] text-[#9A9A8C] hover:text-[#C89B4A] no-underline transition-colors duration-200"
+            >
+              PRIVACY
+            </Link>
+            <Link
+              to="/terms"
+              className="font-mono text-[0.64rem] tracking-[0.08em] text-[#9A9A8C] hover:text-[#C89B4A] no-underline transition-colors duration-200"
+            >
+              TERMS
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

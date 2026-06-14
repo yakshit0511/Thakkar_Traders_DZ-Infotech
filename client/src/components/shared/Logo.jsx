@@ -1,12 +1,16 @@
 import { Link } from 'react-router-dom';
-import logoImage from '../../assets/thakkar-logo.png';
 
-const Logo = ({ className = '', imageClassName = 'h-11 w-auto lg:h-[52px]' }) => (
-  <Link to="/" className={`inline-flex shrink-0 items-center no-underline ${className}`} aria-label="Thakkar Traders — Home">
+const Logo = ({ className = '' }) => (
+  <Link
+    to="/"
+    className={`inline-flex shrink-0 items-center no-underline ${className}`}
+    aria-label="Thakkar Traders — Home"
+  >
     <img
-      src={logoImage}
-      alt="Thakkar Traders"
-      className={`${imageClassName} object-contain`}
+      src="/thakkar-logo-transparent.png"
+      className="h-[68px] sm:h-[74px] lg:h-[80px] w-auto object-contain"
+      style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.12)) brightness(1.05)' }}
+      alt="Thakkar Traders Logo"
     />
   </Link>
 );

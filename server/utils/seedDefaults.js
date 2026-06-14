@@ -12,6 +12,7 @@ const defaultProducts = [
       'Suitable for furniture and wall cladding',
     ],
     displayOrder: 0,
+    featuredImageUrl: '/images/wood_closeup.png',
   },
   {
     name: 'Marine Plywood',
@@ -24,6 +25,7 @@ const defaultProducts = [
       'Available in 6mm to 25mm thickness',
     ],
     displayOrder: 1,
+    featuredImageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&q=80&auto=format&fit=crop',
   },
   {
     name: 'Designer Laminates',
@@ -36,6 +38,7 @@ const defaultProducts = [
       '1mm and 0.8mm thickness available',
     ],
     displayOrder: 2,
+    featuredImageUrl: '/images/wardrobe.png',
   },
   {
     name: 'MDF and HDHMR Boards',
@@ -48,6 +51,7 @@ const defaultProducts = [
       'Available in 3mm to 25mm',
     ],
     displayOrder: 3,
+    featuredImageUrl: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80&auto=format&fit=crop',
   },
   {
     name: 'Flush and Designer Doors',
@@ -60,6 +64,7 @@ const defaultProducts = [
       'Standard and custom sizes',
     ],
     displayOrder: 4,
+    featuredImageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80&auto=format&fit=crop',
   },
   {
     name: 'Hardware and Adhesives',
@@ -72,6 +77,7 @@ const defaultProducts = [
       'Soft-close and push-to-open options',
     ],
     displayOrder: 5,
+    featuredImageUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80&auto=format&fit=crop',
   },
 ];
 
@@ -82,6 +88,15 @@ const seedDefaultData = async () => {
     if (productCount === 0) {
       await Product.insertMany(defaultProducts);
       console.log('Default products seeded successfully');
+    } else {
+      // Ensure existing default products have their images set to the latest URLs
+      for (const p of defaultProducts) {
+        await Product.updateOne(
+          { name: p.name },
+          { $set: { featuredImageUrl: p.featuredImageUrl } }
+        );
+      }
+      console.log('Existing default products updated with latest image URLs');
     }
   } catch (error) {
     console.error('Seed error:', error.message);

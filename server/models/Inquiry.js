@@ -45,6 +45,15 @@ const inquirySchema = new mongoose.Schema(
       type: String,
       maxlength: [2000, 'Message cannot exceed 2000 characters'],
     },
+    selectedImageUrl: {
+      type: String,
+      trim: true,
+    },
+    selectedImageCaption: {
+      type: String,
+      trim: true,
+      maxlength: [300, 'Selected image caption cannot exceed 300 characters'],
+    },
     status: {
       type: String,
       enum: {

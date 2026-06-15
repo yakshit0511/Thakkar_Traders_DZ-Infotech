@@ -9,11 +9,9 @@ const BRANDS = [
 const HERO_SLIDES = [
   { url: '/images/kitchen.png', alt: 'Premium laminate kitchen cabinetry' },
   { url: '/images/wood_closeup.png', alt: 'Natural wood grain texture close-up' },
-  { url: 'https://images.unsplash.com/photo-1618221198740-0a7c0643a088?w=1920&q=85&auto=format&fit=crop', alt: 'Modern interior with premium wood paneling' },
-  { url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&q=85&auto=format&fit=crop', alt: 'Luxury residential interior wood finishes' },
   { url: '/images/tv_unit.png', alt: 'Living room with wooden TV unit' },
-  { url: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1920&q=85&auto=format&fit=crop', alt: 'Designer kitchen with laminate cabinetry' },
-  { url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&q=85&auto=format&fit=crop', alt: 'Architectural interior with wood and MDF' },
+  { url: '/images/wardrobe.png', alt: 'Premium wardrobe and storage finish' },
+  { url: '/images/wall_cladding.png', alt: 'Decorative wall cladding finish' },
 ];
 
 const SLIDE_INTERVAL = 3500;
@@ -86,7 +84,7 @@ const HeroSection = () => {
   ));
 
   return (
-    <section className="hero-section relative w-full overflow-hidden bg-[#F5F1EA]">
+    <section className="hero-section hero-image-section relative w-full overflow-hidden bg-[#111018]">
       {/* Gold top accent */}
       <div
         className="absolute left-0 right-0 top-0 z-30 h-px bg-gradient-to-r from-transparent via-[#C89B4A] to-transparent opacity-50"
@@ -118,7 +116,7 @@ const HeroSection = () => {
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(105deg, rgba(245,241,234,0.92) 0%, rgba(245,241,234,0.72) 40%, rgba(245,241,234,0.18) 100%)',
+            'linear-gradient(105deg, rgba(9,12,18,0.86) 0%, rgba(9,12,18,0.72) 38%, rgba(9,12,18,0.28) 72%, rgba(9,12,18,0.12) 100%)',
         }}
         aria-hidden="true"
       />
@@ -144,7 +142,7 @@ const HeroSection = () => {
       <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col justify-center px-6 pb-[44px] pt-8 sm:px-8 lg:px-12">
         <div className="max-w-4xl">
           <motion.p
-            className="section-label text-[#C89B4A] mb-7"
+            className="section-label hero-section-label mb-7"
             variants={fadeUpVariants}
             initial="hidden"
             animate="visible"
@@ -155,7 +153,7 @@ const HeroSection = () => {
 
           <h1 className="display-heading hero-headline">
             <motion.span
-              className="block text-[#2F2F2F]"
+              className="hero-headline-line block"
               variants={lineVariants}
               initial="hidden"
               animate="visible"
@@ -164,7 +162,7 @@ const HeroSection = () => {
               Building
             </motion.span>
             <motion.span
-              className="block text-[#2F2F2F]"
+              className="hero-headline-line block"
               variants={lineVariants}
               initial="hidden"
               animate="visible"
@@ -173,7 +171,7 @@ const HeroSection = () => {
               Spaces With
             </motion.span>
             <motion.span
-              className="block text-[#2F2F2F]"
+              className="hero-headline-line block"
               variants={lineVariants}
               initial="hidden"
               animate="visible"
@@ -184,7 +182,7 @@ const HeroSection = () => {
           </h1>
 
           <motion.p
-            className="hero-subtext mt-8 max-w-[520px] font-body font-light text-[#6B6B6B]"
+            className="hero-subtext hero-subtext-light mt-8 max-w-[520px] font-body font-light"
             variants={fadeUpVariants}
             initial="hidden"
             animate="visible"
@@ -211,7 +209,7 @@ const HeroSection = () => {
             <a
               href="#quote"
               onClick={scrollToQuote}
-              className="inline-flex w-full items-center justify-center border border-[#2F2F2F]/25 bg-transparent px-8 py-4 font-body text-[0.78rem] font-medium tracking-[0.12em] text-[#2F2F2F] no-underline transition-all duration-300 hover:border-[#C89B4A] hover:bg-[#C89B4A] hover:text-white sm:w-auto"
+              className="inline-flex w-full items-center justify-center border border-white/25 bg-transparent px-8 py-4 font-body text-[0.78rem] font-medium tracking-[0.12em] text-white no-underline transition-all duration-300 hover:border-[#C89B4A] hover:bg-[#C89B4A] hover:text-white sm:w-auto"
             >
               REQUEST QUOTE
             </a>

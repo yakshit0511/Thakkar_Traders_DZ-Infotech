@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import api from '../../utils/api';
 
 const CATEGORIES = [
@@ -103,6 +103,21 @@ const GallerySection = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [inquiryImage, setInquiryImage] = useState(null);
+  const [inquirySubmitting, setInquirySubmitting] = useState(false);
+  const [inquiryStatus, setInquiryStatus] = useState(null);
+  const [inquiryForm, setInquiryForm] = useState({
+    fullName: '',
+    phoneNumber: '',
+    emailAddress: '',
+    city: '',
+    projectType: '',
+    materialRequired: '',
+    message: '',
+    selectedImageUrl: '',
+    selectedImageCaption: '',
+  });
+  const [inquiryErrors, setInquiryErrors] = useState({ fullName: '', phoneNumber: '' });
 
   // Fetch images from API
   useEffect(() => {
@@ -139,10 +154,98 @@ const GallerySection = () => {
     document.body.style.overflow = 'hidden';
   };
 
+  const openInquiry = (image) => {
+    const caption = image.caption || 'Gallery material';
+    const absoluteImageUrl = new URL(image.imageUrl, window.location.origin).toString();
+    setInquiryImage(image);
+    setInquiryStatus(null);
+    setInquiryErrors({ fullName: '', phoneNumber: '' });
+    setInquiryForm({
+      fullName: '',
+      phoneNumber: '',
+      emailAddress: '',
+      city: '',
+      projectType: '',
+      materialRequired: image.category ? image.category.replace(/-/g, ' ') : '',
+      selectedImageUrl: absoluteImageUrl,
+      selectedImageCaption: caption,
+      message: `I am interested in ${caption}. Please share price, quality, brand, availability and any other details.`,
+    });
+    document.body.style.overflow = 'hidden';
+  };
+
   const closeLightbox = useCallback(() => {
     setLightboxIndex(null);
     document.body.style.overflow = '';
   }, []);
+
+  const closeInquiry = useCallback(() => {
+    setInquiryImage(null);
+    setInquiryStatus(null);
+    document.body.style.overflow = '';
+  }, []);
+
+  const handleInquiryChange = (e) => {
+    const { name, value } = e.target;
+    setInquiryForm((prev) => ({ ...prev, [name]: value }));
+    if (inquiryErrors[name]) {
+      setInquiryErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleInquirySubmit = async (e) => {
+    e.preventDefault();
+    setInquiryStatus(null);
+
+    let hasErrors = false;
+    const nextErrors = { fullName: '', phoneNumber: '' };
+
+    if (!inquiryForm.fullName.trim()) {
+      nextErrors.fullName = 'Full name is required';
+      hasErrors = true;
+    }
+    if (!inquiryForm.phoneNumber.trim()) {
+      nextErrors.phoneNumber = 'Phone number is required';
+      hasErrors = true;
+    }
+
+    if (hasErrors) {
+      setInquiryErrors(nextErrors);
+      return;
+    }
+
+    setInquirySubmitting(true);
+    try {
+      const response = await api.post('/inquiries', inquiryForm);
+      if (response.data?.success) {
+        setInquiryStatus({
+          type: 'success',
+          text: 'Inquiry sent successfully. We will contact you soon.',
+        });
+        setInquiryForm({
+          fullName: '',
+          phoneNumber: '',
+          emailAddress: '',
+          city: '',
+          projectType: '',
+          materialRequired: inquiryForm.materialRequired,
+          selectedImageUrl: inquiryForm.selectedImageUrl,
+          selectedImageCaption: inquiryForm.selectedImageCaption,
+          message: inquiryForm.message,
+        });
+      } else {
+        throw new Error(response.data?.message || 'Submission failed');
+      }
+    } catch (error) {
+      console.error('Gallery inquiry submission error:', error);
+      setInquiryStatus({
+        type: 'error',
+        text: 'Could not send inquiry right now. Please try again.',
+      });
+    } finally {
+      setInquirySubmitting(false);
+    }
+  };
 
   const navigateLightbox = useCallback(
     (direction) => {
@@ -161,15 +264,18 @@ const GallerySection = () => {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (lightboxIndex !== null) closeLightbox();
+        if (inquiryImage !== null) closeInquiry();
+      }
       if (lightboxIndex === null) return;
-      if (e.key === 'Escape') closeLightbox();
       if (e.key === 'ArrowLeft') navigateLightbox(-1);
       if (e.key === 'ArrowRight') navigateLightbox(1);
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [lightboxIndex, closeLightbox, navigateLightbox]);
+  }, [lightboxIndex, inquiryImage, closeLightbox, closeInquiry, navigateLightbox]);
 
   return (
     <section
@@ -265,17 +371,25 @@ const GallerySection = () => {
                       />
 
                       {/* Dark Overlay */}
-                      <div className="absolute inset-0 bg-[#1C1915]/78 opacity-0 transition-opacity duration-350 ease-in-out group-hover:opacity-100" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#120F0C]/78 via-[#120F0C]/28 to-transparent opacity-70 transition-opacity duration-350 ease-in-out group-hover:opacity-100" />
 
                       {/* Gold Plus Icon */}
-                      <div className="absolute right-4 top-4 text-[#C89B4A] opacity-0 transition-opacity duration-350 ease-in-out group-hover:opacity-100">
-                        <Plus size={20} />
-                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openInquiry(image);
+                        }}
+                        aria-label={`Send inquiry for ${image.caption || 'gallery image'}`}
+                        className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/18 bg-[#0D0A07]/70 text-[#FFF9F0] shadow-[0_10px_22px_rgba(0,0,0,0.22)] backdrop-blur-[4px] opacity-100 translate-y-0 pointer-events-auto transition-all duration-300 hover:border-[#C89B4A]/55 hover:bg-[#C89B4A] hover:text-white md:opacity-0 md:translate-y-1 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:translate-y-0 md:group-hover:pointer-events-auto"
+                      >
+                        <Plus size={18} />
+                      </button>
 
                       {/* Caption text */}
                       {image.caption && (
-                        <div className="absolute bottom-12 left-0 right-0 px-4 text-center text-[#F2EDE3] opacity-0 translate-y-5 transition-all duration-350 ease-out group-hover:opacity-100 group-hover:translate-y-0">
-                          <p className="font-display italic text-lg m-0 text-[#F2EDE3]">
+                        <div className="absolute bottom-5 left-5 right-5 rounded-2xl border border-white/10 bg-[#0D0A07]/55 px-4 py-3 text-center text-[#F8F4EE] opacity-100 translate-y-0 shadow-[0_12px_28px_rgba(0,0,0,0.28)] backdrop-blur-[4px] transition-all duration-350 ease-out md:opacity-0 md:translate-y-5 md:group-hover:opacity-100 md:group-hover:translate-y-0">
+                          <p className="font-display italic text-[0.95rem] md:text-[1.02rem] leading-snug m-0 text-[#FFF9F0] drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)]">
                             {image.caption}
                           </p>
                         </div>
@@ -362,6 +476,220 @@ const GallerySection = () => {
                 </p>
               )}
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Inquiry Modal */}
+      <AnimatePresence>
+        {inquiryImage !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-[520] flex items-end justify-center bg-[#0D0A07]/94 px-0 py-0 sm:items-center sm:px-6 sm:py-6"
+            onClick={closeInquiry}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 18, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 18, scale: 0.98 }}
+              transition={{ duration: 0.28 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-3xl overflow-hidden rounded-t-[24px] border border-white/10 bg-[#FEFCF8] shadow-[0_28px_80px_rgba(0,0,0,0.45)] max-h-[calc(100dvh-16px)] sm:max-h-[92vh] sm:rounded-[28px]"
+            >
+              <div className="flex items-start justify-between gap-4 border-b border-[#E8E1D5] bg-[#F5F1EA] px-4 py-3 sm:px-6 sm:py-4">
+                <div>
+                  <p className="font-mono text-[0.62rem] tracking-[0.22em] text-[#C89B4A] uppercase m-0">
+                    Gallery Inquiry
+                  </p>
+                  <h3 className="display-heading mt-1.5 text-[1.25rem] sm:mt-2 sm:text-[1.8rem] text-[#2F2F2F] m-0">
+                    Ask about this material
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeInquiry}
+                  className="text-[#6B6B6B] transition-colors duration-200 hover:text-[#2F2F2F]"
+                  aria-label="Close inquiry form"
+                >
+                  <X size={26} />
+                </button>
+              </div>
+
+              <div className="grid max-h-[calc(100dvh-120px)] grid-cols-1 overflow-y-auto lg:grid-cols-[38%_62%] lg:max-h-[calc(92vh-80px)]">
+                <div className="border-b border-[#E8E1D5] bg-[#F5F1EA] p-3 sm:p-4 lg:border-b-0 lg:border-r lg:p-6">
+                  <div className="overflow-hidden rounded-2xl border border-[#DED8CC] bg-[#FEFCF8] shadow-[0_12px_28px_rgba(0,0,0,0.08)]">
+                    <img
+                      src={inquiryImage.imageUrl}
+                      alt={inquiryImage.caption || 'Selected gallery material'}
+                      className="h-32 w-full object-cover sm:h-44 md:h-56 lg:h-auto lg:min-h-[280px]"
+                    />
+                  </div>
+                  <p className="font-mono mt-3 text-[0.58rem] sm:mt-4 sm:text-[0.62rem] tracking-[0.18em] text-[#8A847C] uppercase m-0">
+                    Selected image
+                  </p>
+                  <p className="font-display mt-1.5 text-[0.95rem] sm:mt-2 sm:text-[1.1rem] italic text-[#2F2F2F] m-0 leading-snug">
+                    {inquiryImage.caption || 'Gallery material'}
+                  </p>
+                </div>
+
+                <form onSubmit={handleInquirySubmit} className="p-3 pb-6 sm:p-6 sm:pb-8">
+                  <p className="font-body text-[0.85rem] sm:text-[0.95rem] text-[#6B6B6B] leading-[1.6] mb-4 sm:mb-6">
+                    Share your requirement, price range, quality preference, brand choice, or any other details. We will send this inquiry to the team by email.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-mono text-[0.62rem] tracking-[0.2em] uppercase text-[#6B6B6B]" htmlFor="galleryFullName">
+                        Full Name <span className="text-[#C89B4A]">*</span>
+                      </label>
+                      <input
+                        id="galleryFullName"
+                        name="fullName"
+                        value={inquiryForm.fullName}
+                        onChange={handleInquiryChange}
+                        className={`w-full px-4 py-3 bg-[#FEFCF8] border text-[0.92rem] font-body text-[#2F2F2F] placeholder:text-[#9A9A8C]/60 transition-all duration-250 focus:outline-none focus:shadow-[0_0_0_2px_rgba(200,155,74,0.15)] ${
+                          inquiryErrors.fullName
+                            ? 'border-red-400 focus:border-red-400'
+                            : 'border-[#DED8CC] focus:border-[#C89B4A]'
+                        }`}
+                        placeholder="Your full name"
+                      />
+                      <AnimatePresence>
+                        {inquiryErrors.fullName && (
+                          <motion.span
+                            initial={{ opacity: 0, y: -4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            className="text-red-500 font-body text-[0.76rem] mt-1 block"
+                          >
+                            {inquiryErrors.fullName}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-mono text-[0.62rem] tracking-[0.2em] uppercase text-[#6B6B6B]" htmlFor="galleryPhoneNumber">
+                        Phone Number <span className="text-[#C89B4A]">*</span>
+                      </label>
+                      <input
+                        id="galleryPhoneNumber"
+                        name="phoneNumber"
+                        value={inquiryForm.phoneNumber}
+                        onChange={handleInquiryChange}
+                        className={`w-full px-4 py-3 bg-[#FEFCF8] border text-[0.92rem] font-body text-[#2F2F2F] placeholder:text-[#9A9A8C]/60 transition-all duration-250 focus:outline-none focus:shadow-[0_0_0_2px_rgba(200,155,74,0.15)] ${
+                          inquiryErrors.phoneNumber
+                            ? 'border-red-400 focus:border-red-400'
+                            : 'border-[#DED8CC] focus:border-[#C89B4A]'
+                        }`}
+                        placeholder="+91 XXXXX XXXXX"
+                      />
+                      <AnimatePresence>
+                        {inquiryErrors.phoneNumber && (
+                          <motion.span
+                            initial={{ opacity: 0, y: -4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            className="text-red-500 font-body text-[0.76rem] mt-1 block"
+                          >
+                            {inquiryErrors.phoneNumber}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-mono text-[0.62rem] tracking-[0.2em] uppercase text-[#6B6B6B]" htmlFor="galleryEmailAddress">
+                        Email Address
+                      </label>
+                      <input
+                        id="galleryEmailAddress"
+                        name="emailAddress"
+                        type="email"
+                        value={inquiryForm.emailAddress}
+                        onChange={handleInquiryChange}
+                        className="w-full px-4 py-3 bg-[#FEFCF8] border border-[#DED8CC] text-[0.92rem] font-body text-[#2F2F2F] placeholder:text-[#9A9A8C]/60 transition-all duration-250 focus:outline-none focus:border-[#C89B4A] focus:shadow-[0_0_0_2px_rgba(200,155,74,0.15)]"
+                        placeholder="your@email.com"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-mono text-[0.62rem] tracking-[0.2em] uppercase text-[#6B6B6B]" htmlFor="galleryCity">
+                        City
+                      </label>
+                      <input
+                        id="galleryCity"
+                        name="city"
+                        value={inquiryForm.city}
+                        onChange={handleInquiryChange}
+                        className="w-full px-4 py-3 bg-[#FEFCF8] border border-[#DED8CC] text-[0.92rem] font-body text-[#2F2F2F] placeholder:text-[#9A9A8C]/60 transition-all duration-250 focus:outline-none focus:border-[#C89B4A] focus:shadow-[0_0_0_2px_rgba(200,155,74,0.15)]"
+                        placeholder="Surat, Ahmedabad, Mumbai..."
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 sm:col-span-2">
+                      <label className="font-mono text-[0.62rem] tracking-[0.2em] uppercase text-[#6B6B6B]" htmlFor="galleryProjectType">
+                        Material / Brand Needed
+                      </label>
+                      <input
+                        id="galleryProjectType"
+                        name="projectType"
+                        value={inquiryForm.projectType}
+                        onChange={handleInquiryChange}
+                        className="w-full px-4 py-3 bg-[#FEFCF8] border border-[#DED8CC] text-[0.92rem] font-body text-[#2F2F2F] placeholder:text-[#9A9A8C]/60 transition-all duration-250 focus:outline-none focus:border-[#C89B4A] focus:shadow-[0_0_0_2px_rgba(200,155,74,0.15)]"
+                        placeholder="Price, quality, brand, laminate, plywood, veneer..."
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 sm:col-span-2">
+                      <label className="font-mono text-[0.62rem] tracking-[0.2em] uppercase text-[#6B6B6B]" htmlFor="galleryMaterialRequired">
+                        Notes / Requirement
+                      </label>
+                      <textarea
+                        id="galleryMaterialRequired"
+                        name="message"
+                        value={inquiryForm.message}
+                        onChange={handleInquiryChange}
+                        rows={4}
+                        className="w-full px-4 py-3 bg-[#FEFCF8] border border-[#DED8CC] text-[0.92rem] font-body text-[#2F2F2F] placeholder:text-[#9A9A8C]/60 transition-all duration-250 focus:outline-none focus:border-[#C89B4A] focus:shadow-[0_0_0_2px_rgba(200,155,74,0.15)] resize-y min-h-[110px] sm:min-h-[140px]"
+                        placeholder="Tell us exactly what you need..."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex flex-col gap-3 pb-2 sm:mt-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pb-0">
+                    <p className="font-body text-[0.74rem] sm:text-[0.82rem] text-[#7A7468] m-0 leading-[1.4]">
+                      Your inquiry will be emailed to the team after submission.
+                    </p>
+                    <button
+                      type="submit"
+                      disabled={inquirySubmitting}
+                      className="inline-flex w-full items-center justify-center bg-[#C89B4A] px-6 py-3.5 text-[0.76rem] font-body font-medium tracking-[0.16em] text-white uppercase transition-all duration-300 hover:bg-[#A8732A] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:bg-[#9A9A8C]/50 sm:w-auto sm:px-8 sm:py-4"
+                    >
+                      {inquirySubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Send Inquiry'}
+                    </button>
+                  </div>
+
+                  <AnimatePresence>
+                    {inquiryStatus && (
+                      <motion.p
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        className={`mt-4 mb-0 font-body text-[0.9rem] ${
+                          inquiryStatus.type === 'success' ? 'text-emerald-700' : 'text-red-600'
+                        }`}
+                      >
+                        {inquiryStatus.text}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </form>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

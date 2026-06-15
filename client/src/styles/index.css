@@ -141,6 +141,31 @@ body {
   @media (min-width: 640px) { .hero-headline { font-size: clamp(3.8rem, 7.5vw, 9rem); } }
   .hero-subtext { font-size: clamp(0.95rem, 1.5vw, 1.15rem); }
 
+  .hero-image-section .hero-section-label {
+    color: #F0E2BF;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.28);
+  }
+
+  .hero-image-section .hero-headline-line {
+    color: #F7F3EC;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.36);
+  }
+
+  .hero-image-section .hero-subtext-light {
+    color: rgba(247, 243, 236, 0.82);
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.28);
+  }
+
+  .hero-image-section .hero-headline .font-display {
+    color: #E0B86A;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.36);
+  }
+
+  .hero-image-section .btn-outline-gold,
+  .hero-image-section a[href="#quote"] {
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+
   /* --- Marquee (sits in dark hero area) --- */
   .marquee-strip {
     height: 42px;

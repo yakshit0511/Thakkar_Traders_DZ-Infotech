@@ -36,6 +36,16 @@ const buildInquiryEmailHtml = (inquiry) => {
           </div>
           <div style="background:#ffffff;padding:32px 24px;border-radius:0 0 8px 8px;border:1px solid #D6D0C6;">
             <h2 style="margin:0 0 24px;color:#1C1C1C;font-size:20px;">New Inquiry Received</h2>
+            ${
+              inquiry.selectedImageUrl
+                ? `
+            <div style="margin:0 0 24px;padding:16px;border:1px solid #E8E4DC;border-radius:12px;background:#FAF7F2;">
+              <p style="margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#8C7750;">Selected image</p>
+              <img src="${inquiry.selectedImageUrl}" alt="${inquiry.selectedImageCaption || 'Selected gallery image'}" style="width:100%;max-width:520px;display:block;border-radius:10px;border:1px solid #E0D9CC;margin-bottom:12px;object-fit:cover;" />
+              <p style="margin:0;color:#4A4032;font-size:14px;line-height:1.6;">${inquiry.selectedImageCaption || 'Selected gallery image'}</p>
+            </div>`
+                : ''
+            }
             <table style="width:100%;border-collapse:collapse;font-size:14px;">
               ${tableRows}
             </table>

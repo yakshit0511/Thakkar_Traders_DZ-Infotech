@@ -34,15 +34,15 @@ const fmtTime = (d) => {
   return `${hourStr}:${minutes} ${ampm}`;
 };
 
-const statusColor = { new: '#C9A84C', read: '#7A8BA8', replied: '#2ECC71' };
-const statusBg    = { new: 'rgba(201,168,76,0.12)', read: 'rgba(122,139,168,0.12)', replied: 'rgba(46,204,113,0.12)' };
+const statusColor = { new: '#C9A84C', read: 'var(--admin-text-secondary)', replied: 'var(--admin-success)' };
+const statusBg    = { new: 'rgba(201,168,76,0.12)', read: 'rgba(122,139,168,0.12)', replied: 'rgba(16,185,129,0.1)' };
 const statusLabel = { new: 'NEW', read: 'READ', replied: 'REPLIED' };
 
 /* ─── Custom Checkbox ─────────────────────────────────────────────────── */
 const CustomCheckbox = ({ checked, onChange }) => (
   <div onClick={onChange} style={{
-    width: 16, height: 16, background: checked ? '#C9A84C' : '#0F1520',
-    border: '1px solid #2A3D5C', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    width: 16, height: 16, background: checked ? '#C9A84C' : 'var(--admin-bg-card)',
+    border: '1px solid var(--admin-border-light)', display: 'flex', alignItems: 'center', justifyContent: 'center',
     cursor: 'pointer', borderRadius: 0, flexShrink: 0
   }}>
     {checked && (
@@ -102,27 +102,27 @@ const DeleteDialog = ({ inquiry, onCancel, onConfirm, loading }) => {
   const name = isBulk ? `${inquiry.length} inquiries` : inquiry?.fullName;
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(15,23,42,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
       onClick={onCancel}
     >
       <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }}
         onClick={e => e.stopPropagation()}
-        style={{ background: '#151D2E', border: '1px solid #1F2D45', padding: 32, maxWidth: 400, width: '100%', textAlign: 'center', borderRadius: 0 }}
+        style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', padding: 32, maxWidth: 400, width: '100%', textAlign: 'center', borderRadius: 0 }}
       >
-        <Trash2 size={32} color="#E74C3C" style={{ margin: '0 auto 16px' }} />
-        <p style={{ fontSize: '1.0rem', fontWeight: 600, color: '#E8EDF5', marginBottom: 8, fontFamily: "'Inter', sans-serif" }}>
+        <Trash2 size={32} color="var(--admin-danger)" style={{ margin: '0 auto 16px' }} />
+        <p style={{ fontSize: '1.0rem', fontWeight: 600, color: 'var(--admin-text-primary)', marginBottom: 8, fontFamily: "'Inter', sans-serif" }}>
           {isBulk ? 'DELETE INQUIRIES' : 'DELETE INQUIRY'}
         </p>
-        <p style={{ fontSize: '0.85rem', fontWeight: 300, color: '#7A8BA8', marginBottom: 28, lineHeight: 1.6, fontFamily: "'Inter', sans-serif" }}>
+        <p style={{ fontSize: '0.85rem', fontWeight: 300, color: 'var(--admin-text-secondary)', marginBottom: 28, lineHeight: 1.6, fontFamily: "'Inter', sans-serif" }}>
           {isBulk
             ? `Are you sure you want to delete ${inquiry.length} inquiries? This action cannot be undone.`
             : `This will permanently delete the inquiry from ${name}. This action cannot be undone.`}
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-          <button onClick={onCancel} style={{ background: '#1C2640', color: '#7A8BA8', border: '1px solid #2A3D5C', padding: '12px 24px', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer', borderRadius: 0 }}>
+          <button onClick={onCancel} style={{ background: 'var(--admin-bg-card)', color: 'var(--admin-text-secondary)', border: '1px solid var(--admin-border-light)', padding: '12px 24px', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer', borderRadius: 0 }}>
             CANCEL
           </button>
-          <button onClick={onConfirm} disabled={loading} style={{ background: '#E74C3C', color: '#fff', border: 'none', padding: '12px 24px', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer', opacity: loading ? 0.6 : 1, borderRadius: 0 }}>
+          <button onClick={onConfirm} disabled={loading} style={{ background: 'var(--admin-danger)', color: '#fff', border: 'none', padding: '12px 24px', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer', opacity: loading ? 0.6 : 1, borderRadius: 0 }}>
             {loading ? 'DELETING...' : 'DELETE'}
           </button>
         </div>
@@ -159,8 +159,8 @@ const DetailDrawer = ({ inquiry, onClose, onStatusChange, onDelete }) => {
 
   const Field = ({ label, children }) => (
     <div style={{ marginBottom: 20 }}>
-      <p style={{ fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.15em', textTransform: 'uppercase', color: '#4A5A72', marginBottom: 4 }}>{label}</p>
-      <div style={{ fontSize: '0.88rem', color: '#E8EDF5', fontFamily: "'Inter', sans-serif", lineHeight: 1.6 }}>{children}</div>
+      <p style={{ fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--admin-text-tertiary)', marginBottom: 4 }}>{label}</p>
+      <div style={{ fontSize: '0.88rem', color: 'var(--admin-text-primary)', fontFamily: "'Inter', sans-serif", lineHeight: 1.6 }}>{children}</div>
     </div>
   );
 
@@ -168,32 +168,32 @@ const DetailDrawer = ({ inquiry, onClose, onStatusChange, onDelete }) => {
     <>
       {/* Backdrop */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 195, background: 'rgba(0,0,0,0.6)' }} />
+        onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 195, background: 'rgba(15,23,42,0.12)' }} />
       {/* Drawer */}
       <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        style={{ position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 200, width: 'min(480px, 100vw)', background: '#0F1520', borderLeft: '1px solid #1F2D45', display: 'flex', flexDirection: 'column', overflowY: 'auto', borderRadius: 0 }}
+        style={{ position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 200, width: 'min(480px, 100vw)', background: 'var(--admin-bg-card)', borderLeft: '1px solid var(--admin-border)', display: 'flex', flexDirection: 'column', overflowY: 'auto', borderRadius: 0 }}
       >
         {/* Drawer Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', borderBottom: '1px solid #1F2D45', flexShrink: 0 }}>
-          <span style={{ fontSize: '0.65rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.2em', color: '#7A8BA8' }}>INQUIRY DETAILS</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8BA8', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}
-            onMouseEnter={e => e.currentTarget.style.color = '#E8EDF5'}
-            onMouseLeave={e => e.currentTarget.style.color = '#7A8BA8'}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', borderBottom: '1px solid var(--admin-border)', flexShrink: 0 }}>
+          <span style={{ fontSize: '0.65rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.2em', color: 'var(--admin-text-secondary)' }}>INQUIRY DETAILS</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-text-secondary)', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--admin-text-primary)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--admin-text-secondary)'}>
             <X size={18} />
           </button>
         </div>
 
         {/* Content */}
         <div style={{ padding: 24, flex: 1 }}>
-          <p style={{ fontSize: '1.1rem', fontWeight: 600, color: '#E8EDF5', fontFamily: "'Inter', sans-serif", marginBottom: 8 }}>{inquiry.fullName}</p>
+          <p style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--admin-text-primary)', fontFamily: "'Inter', sans-serif", marginBottom: 8 }}>{inquiry.fullName}</p>
           <StatusBadge status={currentStatus} loading={updatingStatus} />
-          <hr style={{ border: 'none', borderTop: '1px solid #1F2D45', margin: '20px 0' }} />
+          <hr style={{ border: 'none', borderTop: '1px solid var(--admin-border)', margin: '20px 0' }} />
 
           <Field label="Phone Number">
-            <a href={`tel:${inquiry.phoneNumber}`} style={{ color: '#E8EDF5', textDecoration: 'none' }}>{inquiry.phoneNumber}</a>
+            <a href={`tel:${inquiry.phoneNumber}`} style={{ color: 'var(--admin-text-primary)', textDecoration: 'none' }}>{inquiry.phoneNumber}</a>
           </Field>
-          <Field label="Email Address">{inquiry.emailAddress || <span style={{ color: '#4A5A72', fontStyle: 'italic' }}>Not provided</span>}</Field>
+          <Field label="Email Address">{inquiry.emailAddress || <span style={{ color: 'var(--admin-text-tertiary)', fontStyle: 'italic' }}>Not provided</span>}</Field>
           <Field label="City">{inquiry.city || '—'}</Field>
           <Field label="Project Type"><span style={{ color: '#C9A84C' }}>{inquiry.projectType || '—'}</span></Field>
           <Field label="Material Required">{inquiry.materialRequired || '—'}</Field>
@@ -202,8 +202,8 @@ const DetailDrawer = ({ inquiry, onClose, onStatusChange, onDelete }) => {
 
           {inquiry.message && (
             <div style={{ marginBottom: 20 }}>
-              <p style={{ fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.15em', textTransform: 'uppercase', color: '#4A5A72', marginBottom: 8 }}>MESSAGE</p>
-              <div style={{ background: '#151D2E', padding: 16, fontSize: '0.88rem', fontWeight: 300, fontFamily: "'Inter', sans-serif", color: '#E8EDF5', lineHeight: 1.7, borderRadius: 0 }}>
+              <p style={{ fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--admin-text-tertiary)', marginBottom: 8 }}>MESSAGE</p>
+              <div style={{ background: 'var(--admin-bg-elevated)', padding: 16, fontSize: '0.88rem', fontWeight: 300, fontFamily: "'Inter', sans-serif", color: 'var(--admin-text-primary)', lineHeight: 1.7, borderRadius: 0 }}>
                 {inquiry.message}
               </div>
             </div>
@@ -213,17 +213,17 @@ const DetailDrawer = ({ inquiry, onClose, onStatusChange, onDelete }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 32 }}>
             <DrawerButton
               href={`tel:${inquiry.phoneNumber}`}
-              bg="rgba(46,204,113,0.1)"
-              border="rgba(46,204,113,0.3)"
-              color="#2ECC71"
+              bg="rgba(16,185,129,0.08)"
+              border="rgba(16,185,129,0.16)"
+              color="var(--admin-success)"
               icon={Phone}
               label="CALL NOW"
             />
             <DrawerButton
               href={waUrl}
               target="_blank"
-              bg="rgba(37,211,102,0.1)"
-              border="rgba(37,211,102,0.3)"
+              bg="rgba(16,185,129,0.08)"
+              border="rgba(16,185,129,0.16)"
               color="#25D366"
               icon={MessageCircle}
               label="SEND WHATSAPP"
@@ -231,8 +231,8 @@ const DetailDrawer = ({ inquiry, onClose, onStatusChange, onDelete }) => {
             {inquiry.emailAddress && (
               <DrawerButton
                 href={`mailto:${inquiry.emailAddress}?subject=Following up on your inquiry - Thakkar Traders`}
-                bg="rgba(52,152,219,0.1)"
-                border="rgba(52,152,219,0.3)"
+                bg="rgba(59,130,246,0.08)"
+                border="rgba(59,130,246,0.16)"
                 color="#3498DB"
                 icon={Mail}
                 label="SEND EMAIL"
@@ -242,7 +242,7 @@ const DetailDrawer = ({ inquiry, onClose, onStatusChange, onDelete }) => {
 
           {/* Status Change */}
           <div style={{ marginTop: 32 }}>
-            <p style={{ fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.15em', textTransform: 'uppercase', color: '#4A5A72', marginBottom: 12 }}>CHANGE STATUS</p>
+            <p style={{ fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--admin-text-tertiary)', marginBottom: 12 }}>CHANGE STATUS</p>
             <div style={{ display: 'flex', gap: 8 }}>
               {['new', 'read', 'replied'].map(s => (
                 <button key={s} onClick={() => handleStatusPill(s)} disabled={updatingStatus}
@@ -250,7 +250,7 @@ const DetailDrawer = ({ inquiry, onClose, onStatusChange, onDelete }) => {
                     padding: '6px 16px', fontSize: '0.65rem', fontFamily: "'DM Mono', monospace",
                     letterSpacing: '0.1em', cursor: 'pointer', border: `1px solid ${statusColor[s]}`,
                     background: currentStatus === s ? statusColor[s] : 'transparent',
-                    color: currentStatus === s ? '#0A0F1E' : statusColor[s], fontWeight: 600,
+                    color: currentStatus === s ? 'var(--admin-text-primary)' : statusColor[s], fontWeight: 600,
                     transition: 'all 0.2s', borderRadius: 0
                   }}>
                   {s.toUpperCase()}
@@ -262,8 +262,8 @@ const DetailDrawer = ({ inquiry, onClose, onStatusChange, onDelete }) => {
           {/* Delete */}
           <button onClick={() => onDelete(inquiry)} style={{
             marginTop: 32, display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px',
-            background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)',
-            color: '#EF4444', fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', fontWeight: 500, cursor: 'pointer', borderRadius: 0
+            background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.14)',
+            color: 'var(--admin-danger)', fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', fontWeight: 500, cursor: 'pointer', borderRadius: 0
           }}>
             <Trash2 size={14} /> DELETE INQUIRY
           </button>
@@ -428,13 +428,13 @@ const AdminInquiriesPage = () => {
 
   /* Input style */
   const inputStyle = {
-    background: '#0F1520', border: '1px solid #1F2D45', color: '#E8EDF5',
+    background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)',
     padding: '10px 14px', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem',
     outline: 'none', width: '100%', borderRadius: 0,
   };
   const labelStyle = {
     fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.12em',
-    color: '#7A8BA8', textTransform: 'uppercase', marginBottom: 4, display: 'block',
+    color: 'var(--admin-text-secondary)', textTransform: 'uppercase', marginBottom: 4, display: 'block',
   };
 
   return (
@@ -442,8 +442,8 @@ const AdminInquiriesPage = () => {
       {/* ── Page Header ── */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#E8EDF5', fontFamily: "'Inter', sans-serif", margin: 0 }}>INQUIRIES</h1>
-          <p style={{ fontSize: '0.82rem', fontWeight: 300, color: '#7A8BA8', fontFamily: "'Inter', sans-serif", marginTop: 4 }}>
+          <h1 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--admin-text-primary)', fontFamily: "'Inter', sans-serif", margin: 0 }}>INQUIRIES</h1>
+          <p style={{ fontSize: '0.82rem', fontWeight: 300, color: 'var(--admin-text-secondary)', fontFamily: "'Inter', sans-serif", marginTop: 4 }}>
             Showing {allInquiries.length} total inquiries, <span style={{ color: '#C9A84C' }}>{unread} unread</span>
           </p>
         </div>
@@ -453,9 +453,9 @@ const AdminInquiriesPage = () => {
             { label: 'REFRESH', icon: <RefreshCw size={14} className={refreshing ? 'animate-spin-custom' : ''} />, onClick: () => fetchInquiries(true) },
           ].map(btn => (
             <button key={btn.label} onClick={btn.onClick} disabled={btn.loading}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px', background: 'transparent', border: '1px solid #2A3D5C', color: '#7A8BA8', fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', letterSpacing: '0.12em', cursor: 'pointer', transition: 'all 0.2s', borderRadius: 0 }}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px', background: 'transparent', border: '1px solid var(--admin-border-light)', color: 'var(--admin-text-secondary)', fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', letterSpacing: '0.12em', cursor: 'pointer', transition: 'all 0.2s', borderRadius: 0 }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = '#C9A84C'; e.currentTarget.style.color = '#C9A84C'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#2A3D5C'; e.currentTarget.style.color = '#7A8BA8'; }}>
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--admin-border-light)'; e.currentTarget.style.color = 'var(--admin-text-secondary)'; }}>
               {btn.icon} {btn.label}
             </button>
           ))}
@@ -463,18 +463,18 @@ const AdminInquiriesPage = () => {
       </div>
 
       {/* ── Filter Panel ── */}
-      <div style={{ background: '#151D2E', border: '1px solid #1F2D45', padding: '20px 24px', marginBottom: 20, borderRadius: 0 }}>
+      <div style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', padding: '20px 24px', marginBottom: 20, borderRadius: 0 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'flex-end' }}>
           {/* Search */}
           <div style={{ flex: '1 1 280px' }}>
             <label style={labelStyle}>Search by Name or Phone</label>
             <div style={{ position: 'relative' }}>
-              <Search size={14} color="#4A5A72" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+              <Search size={14} color="var(--admin-text-tertiary)" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
               <input value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="SEARCH BY NAME OR PHONE"
                 style={{ ...inputStyle, paddingLeft: 38, fontFamily: "'DM Mono', monospace", fontSize: '0.62rem', letterSpacing: '0.1em' }}
                 onFocus={e => e.target.style.borderColor = '#C9A84C'}
-                onBlur={e => e.target.style.borderColor = '#1F2D45'}
+                onBlur={e => e.target.style.borderColor = 'var(--admin-border)'}
               />
             </div>
           </div>
@@ -499,7 +499,7 @@ const AdminInquiriesPage = () => {
             <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 4 }}><Calendar size={10} /> FROM</label>
             <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={inputStyle}
               onFocus={e => e.target.style.borderColor = '#C9A84C'}
-              onBlur={e => e.target.style.borderColor = '#1F2D45'} />
+              onBlur={e => e.target.style.borderColor = 'var(--admin-border)'} />
           </div>
 
           {/* Date To */}
@@ -507,13 +507,13 @@ const AdminInquiriesPage = () => {
             <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 4 }}><Calendar size={10} /> TO</label>
             <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={inputStyle}
               onFocus={e => e.target.style.borderColor = '#C9A84C'}
-              onBlur={e => e.target.style.borderColor = '#1F2D45'} />
+              onBlur={e => e.target.style.borderColor = 'var(--admin-border)'} />
           </div>
 
           {/* Clear */}
           {hasFilters && (
             <button onClick={() => { setSearch(''); setStatusFilter(''); setDateFrom(''); setDateTo(''); setPage(1); }}
-              style={{ background: 'none', border: 'none', color: '#7A8BA8', fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', cursor: 'pointer', padding: '10px 0', borderRadius: 0 }}>
+              style={{ background: 'none', border: 'none', color: 'var(--admin-text-secondary)', fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', cursor: 'pointer', padding: '10px 0', borderRadius: 0 }}>
               CLEAR
             </button>
           )}
@@ -531,8 +531,8 @@ const AdminInquiriesPage = () => {
               style={{
                 padding: '5px 14px', fontSize: '0.65rem', fontFamily: "'DM Mono', monospace",
                 letterSpacing: '0.1em', cursor: 'pointer', border: 'none', transition: 'all 0.2s',
-                background: statusFilter === pill.value ? '#C9A84C' : '#1C2640',
-                color: statusFilter === pill.value ? '#0A0F1E' : '#7A8BA8', fontWeight: 600,
+                background: statusFilter === pill.value ? '#C9A84C' : 'var(--admin-bg-card)',
+                color: statusFilter === pill.value ? 'var(--admin-text-primary)' : 'var(--admin-text-secondary)', fontWeight: 600,
                 borderRadius: 0
               }}>
               {pill.label} ({counts[pill.value]})
@@ -542,13 +542,13 @@ const AdminInquiriesPage = () => {
       </div>
 
       {/* ── Table Panel ── */}
-      <div style={{ background: '#151D2E', border: '1px solid #1F2D45', overflow: 'hidden', borderRadius: 0 }}>
+      <div style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', overflow: 'hidden', borderRadius: 0 }}>
         {/* Bulk Actions Bar */}
         <AnimatePresence>
           {selected.size > 0 && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-              style={{ background: '#1C2640', padding: '12px 24px', borderBottom: '1px solid #1F2D45', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, borderRadius: 0 }}>
-              <span style={{ fontSize: '0.83rem', fontWeight: 500, color: '#E8EDF5', fontFamily: "'Inter', sans-serif" }}>
+              style={{ background: 'var(--admin-bg-card)', padding: '12px 24px', borderBottom: '1px solid var(--admin-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, borderRadius: 0 }}>
+              <span style={{ fontSize: '0.83rem', fontWeight: 500, color: 'var(--admin-text-primary)', fontFamily: "'Inter', sans-serif" }}>
                 {selected.size} {selected.size === 1 ? 'inquiry' : 'inquiries'} selected
               </span>
               <div style={{ display: 'flex', gap: 10 }}>
@@ -560,8 +560,8 @@ const AdminInquiriesPage = () => {
                   <button key={btn.label} onClick={btn.action}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px',
-                      background: 'none', border: `1px solid ${btn.danger ? '#E74C3C' : '#2A3D5C'}`,
-                      color: btn.danger ? '#E74C3C' : '#7A8BA8', fontFamily: "'DM Mono', monospace",
+                      background: 'none', border: `1px solid ${btn.danger ? 'var(--admin-danger)' : 'var(--admin-border-light)'}`,
+                      color: btn.danger ? 'var(--admin-danger)' : 'var(--admin-text-secondary)', fontFamily: "'DM Mono', monospace",
                       fontSize: '0.62rem', letterSpacing: '0.1em', cursor: 'pointer', borderRadius: 0
                     }}>
                     {btn.icon} {btn.label}
@@ -575,13 +575,13 @@ const AdminInquiriesPage = () => {
         {loading ? (
           <div style={{ padding: 40 }}>
             {[...Array(5)].map((_, i) => (
-              <div key={i} style={{ height: 56, background: '#1C2640', marginBottom: 8, animation: 'pulse 1.5s infinite' }} />
+              <div key={i} style={{ height: 56, background: 'var(--admin-bg-card)', marginBottom: 8, animation: 'pulse 1.5s infinite' }} />
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ padding: 80, textAlign: 'center' }}>
-            <Mail size={48} color="#4A5A72" style={{ margin: '0 auto 16px' }} />
-            <p style={{ color: '#7A8BA8', fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>No inquiries found</p>
+            <Mail size={48} color="var(--admin-text-tertiary)" style={{ margin: '0 auto 16px' }} />
+            <p style={{ color: 'var(--admin-text-secondary)', fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>No inquiries found</p>
             {hasFilters && (
               <button onClick={() => { setSearch(''); setStatusFilter(''); setDateFrom(''); setDateTo(''); }}
                 style={{ marginTop: 12, color: '#C9A84C', background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', borderRadius: 0 }}>
@@ -595,9 +595,9 @@ const AdminInquiriesPage = () => {
             <div className="hidden md:block" style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #1F2D45' }}>
+                  <tr style={{ borderBottom: '1px solid var(--admin-border)' }}>
                     {['', 'NAME & CONTACT', 'PROJECT DETAILS', 'CITY', 'DATE', 'STATUS', 'ACTIONS'].map((h, idx) => (
-                      <th key={idx} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.12em', color: '#4A5A72', fontWeight: 600, textTransform: 'uppercase', background: '#0F1520' }}>
+                      <th key={idx} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.12em', color: 'var(--admin-text-tertiary)', fontWeight: 600, textTransform: 'uppercase', background: 'var(--admin-bg-card)' }}>
                         {h === '' ? (
                           <CustomCheckbox checked={selected.size === paged.length && paged.length > 0} onChange={toggleAll} />
                         ) : h}
@@ -610,31 +610,31 @@ const AdminInquiriesPage = () => {
                     {paged.map(inq => (
                       <motion.tr key={inq._id} layout exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}
                         style={{
-                          borderBottom: '1px solid #1F2D45', cursor: 'pointer', transition: 'background 0.15s',
-                          borderLeft: inq.status === 'new' ? '3px solid #C9A84C' : inq.status === 'replied' ? '3px solid #2ECC71' : '3px solid transparent',
-                          background: selected.has(inq._id) ? 'rgba(201,168,76,0.06)' : 'transparent',
+                          borderBottom: '1px solid var(--admin-border)', cursor: 'pointer', transition: 'background 0.15s',
+                          borderLeft: inq.status === 'new' ? '3px solid #C9A84C' : inq.status === 'replied' ? '3px solid var(--admin-success)' : '3px solid transparent',
+                          background: selected.has(inq._id) ? 'rgba(201,168,76,0.08)' : 'transparent',
                         }}
-                        onMouseEnter={e => { if (!selected.has(inq._id)) e.currentTarget.style.background = '#1C2640'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = selected.has(inq._id) ? 'rgba(201,168,76,0.06)' : 'transparent'; }}
+                        onMouseEnter={e => { if (!selected.has(inq._id)) e.currentTarget.style.background = 'var(--admin-bg-card)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = selected.has(inq._id) ? 'rgba(201,168,76,0.08)' : 'transparent'; }}
                       >
                         <td style={{ padding: '14px 16px' }} onClick={e => e.stopPropagation()}>
                           <CustomCheckbox checked={selected.has(inq._id)} onChange={() => toggleSelect(inq._id)} />
                         </td>
                         <td style={{ padding: '14px 16px' }} onClick={() => setDrawer(inq)}>
-                          <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 500, color: '#E8EDF5', fontFamily: "'Inter', sans-serif" }}>{inq.fullName}</p>
-                          <p style={{ margin: '2px 0 0', fontSize: '0.72rem', color: '#7A8BA8', fontFamily: "'DM Mono', monospace" }}>{inq.phoneNumber}</p>
-                          {inq.emailAddress && <p style={{ margin: '1px 0 0', fontSize: '0.75rem', fontWeight: 300, color: '#4A5A72', fontFamily: "'Inter', sans-serif" }}>{inq.emailAddress.length > 28 ? inq.emailAddress.slice(0, 28) + '…' : inq.emailAddress}</p>}
+                          <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 500, color: 'var(--admin-text-primary)', fontFamily: "'Inter', sans-serif" }}>{inq.fullName}</p>
+                          <p style={{ margin: '2px 0 0', fontSize: '0.72rem', color: 'var(--admin-text-secondary)', fontFamily: "'DM Mono', monospace" }}>{inq.phoneNumber}</p>
+                          {inq.emailAddress && <p style={{ margin: '1px 0 0', fontSize: '0.75rem', fontWeight: 300, color: 'var(--admin-text-tertiary)', fontFamily: "'Inter', sans-serif" }}>{inq.emailAddress.length > 28 ? inq.emailAddress.slice(0, 28) + '…' : inq.emailAddress}</p>}
                         </td>
                         <td style={{ padding: '14px 16px' }} onClick={() => setDrawer(inq)}>
                           <p style={{ margin: 0, fontSize: '0.83rem', color: '#C9A84C', fontFamily: "'Inter', sans-serif" }}>{inq.projectType || '—'}</p>
-                          <p style={{ margin: '2px 0 0', fontSize: '0.75rem', fontWeight: 300, color: '#7A8BA8', fontFamily: "'Inter', sans-serif" }}>{inq.materialRequired ? (inq.materialRequired.length > 35 ? inq.materialRequired.slice(0, 35) + '…' : inq.materialRequired) : '—'}</p>
+                          <p style={{ margin: '2px 0 0', fontSize: '0.75rem', fontWeight: 300, color: 'var(--admin-text-secondary)', fontFamily: "'Inter', sans-serif" }}>{inq.materialRequired ? (inq.materialRequired.length > 35 ? inq.materialRequired.slice(0, 35) + '…' : inq.materialRequired) : '—'}</p>
                         </td>
-                        <td style={{ padding: '14px 16px', fontSize: '0.83rem', fontWeight: 300, color: '#7A8BA8', fontFamily: "'Inter', sans-serif" }} onClick={() => setDrawer(inq)}>
+                        <td style={{ padding: '14px 16px', fontSize: '0.83rem', fontWeight: 300, color: 'var(--admin-text-secondary)', fontFamily: "'Inter', sans-serif" }} onClick={() => setDrawer(inq)}>
                           {inq.city ? <><MapPin size={11} style={{ display: 'inline', marginRight: 4 }} />{inq.city}</> : '—'}
                         </td>
                         <td style={{ padding: '14px 16px' }} onClick={() => setDrawer(inq)}>
-                          <p style={{ margin: 0, fontSize: '0.72rem', color: '#7A8BA8', fontFamily: "'DM Mono', monospace" }}>{fmtDate(inq.createdAt)}</p>
-                          <p style={{ margin: '2px 0 0', fontSize: '0.65rem', color: '#4A5A72', fontFamily: "'DM Mono', monospace" }}>{fmtTime(inq.createdAt)}</p>
+                          <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--admin-text-secondary)', fontFamily: "'DM Mono', monospace" }}>{fmtDate(inq.createdAt)}</p>
+                          <p style={{ margin: '2px 0 0', fontSize: '0.65rem', color: 'var(--admin-text-tertiary)', fontFamily: "'DM Mono', monospace" }}>{fmtTime(inq.createdAt)}</p>
                         </td>
                         <td style={{ padding: '14px 16px' }} onClick={e => e.stopPropagation()}>
                           <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -650,13 +650,13 @@ const AdminInquiriesPage = () => {
                         <td style={{ padding: '14px 16px' }} onClick={e => e.stopPropagation()}>
                           <div style={{ display: 'flex', gap: 8 }}>
                             <button onClick={() => setDrawer(inq)} title="VIEW DETAILS"
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8BA8', padding: 4, display: 'flex', borderRadius: 0 }}>
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-text-secondary)', padding: 4, display: 'flex', borderRadius: 0 }}>
                               <Eye size={16} />
                             </button>
                             <button onClick={() => setDeleteTarget(inq)} title="DELETE"
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8BA8', padding: 4, display: 'flex', transition: 'color 0.2s', borderRadius: 0 }}
-                              onMouseEnter={e => e.currentTarget.style.color = '#E74C3C'}
-                              onMouseLeave={e => e.currentTarget.style.color = '#7A8BA8'}>
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-text-secondary)', padding: 4, display: 'flex', transition: 'color 0.2s', borderRadius: 0 }}
+                              onMouseEnter={e => e.currentTarget.style.color = 'var(--admin-danger)'}
+                              onMouseLeave={e => e.currentTarget.style.color = 'var(--admin-text-secondary)'}>
                               <Trash2 size={16} />
                             </button>
                           </div>
@@ -673,19 +673,19 @@ const AdminInquiriesPage = () => {
               {paged.map(inq => (
                 <div key={inq._id} onClick={() => setDrawer(inq)}
                   style={{
-                    background: '#0F1520', border: '1px solid #1F2D45', padding: 16,
-                    borderLeft: `3px solid ${inq.status === 'new' ? '#C9A84C' : inq.status === 'replied' ? '#2ECC71' : '#1F2D45'}`,
+                    background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)', padding: 16,
+                    borderLeft: `3px solid ${inq.status === 'new' ? '#C9A84C' : inq.status === 'replied' ? 'var(--admin-success)' : 'var(--admin-border)'}`,
                     position: 'relative', borderRadius: 0
                   }}>
                   <div style={{ position: 'absolute', top: 12, right: 12 }} onClick={e => e.stopPropagation()}>
                     <CustomCheckbox checked={selected.has(inq._id)} onChange={() => toggleSelect(inq._id)} />
                   </div>
-                  <p style={{ margin: '0 0 4px', fontSize: '0.9rem', fontWeight: 600, color: '#E8EDF5', fontFamily: "'Inter', sans-serif" }}>{inq.fullName}</p>
-                  <p style={{ margin: '0 0 8px', fontSize: '0.75rem', color: '#7A8BA8', fontFamily: "'DM Mono', monospace" }}>{inq.phoneNumber}</p>
+                  <p style={{ margin: '0 0 4px', fontSize: '0.9rem', fontWeight: 600, color: 'var(--admin-text-primary)', fontFamily: "'Inter', sans-serif" }}>{inq.fullName}</p>
+                  <p style={{ margin: '0 0 8px', fontSize: '0.75rem', color: 'var(--admin-text-secondary)', fontFamily: "'DM Mono', monospace" }}>{inq.phoneNumber}</p>
                   <p style={{ margin: '0 0 4px', fontSize: '0.8rem', color: '#C9A84C', fontFamily: "'Inter', sans-serif" }}>{inq.projectType || '—'}</p>
                   <div style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between', marginTop: 10 }}>
                     <StatusBadge status={inq.status} loading={updatingStatusIds.has(inq._id)} />
-                    <span style={{ fontSize: '0.65rem', color: '#4A5A72', fontFamily: "'DM Mono', monospace" }}>{fmtDate(inq.createdAt)}</span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--admin-text-tertiary)', fontFamily: "'DM Mono', monospace" }}>{fmtDate(inq.createdAt)}</span>
                   </div>
                 </div>
               ))}
@@ -693,13 +693,13 @@ const AdminInquiriesPage = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderTop: '1px solid #1F2D45', flexWrap: 'wrap', gap: 12 }}>
-                <span style={{ fontSize: '0.65rem', color: '#7A8BA8', fontFamily: "'DM Mono', monospace" }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderTop: '1px solid var(--admin-border)', flexWrap: 'wrap', gap: 12 }}>
+                <span style={{ fontSize: '0.65rem', color: 'var(--admin-text-secondary)', fontFamily: "'DM Mono', monospace" }}>
                   {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length} inquiries
                 </span>
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                    style={{ background: '#1C2640', border: 'none', color: page === 1 ? '#2A3D5C' : '#7A8BA8', padding: '6px 10px', cursor: page === 1 ? 'default' : 'pointer', borderRadius: 0 }}>
+                    style={{ background: 'var(--admin-bg-card)', border: 'none', color: page === 1 ? 'var(--admin-border-light)' : 'var(--admin-text-secondary)', padding: '6px 10px', cursor: page === 1 ? 'default' : 'pointer', borderRadius: 0 }}>
                     <ChevronLeft size={14} />
                   </button>
                   {[...Array(Math.min(5, totalPages))].map((_, i) => {
@@ -711,13 +711,13 @@ const AdminInquiriesPage = () => {
                     }
                     return (
                       <button key={p} onClick={() => setPage(p)}
-                        style={{ background: page === p ? '#C9A84C' : '#1C2640', border: 'none', color: page === p ? '#0A0F1E' : '#7A8BA8', padding: '6px 12px', cursor: 'pointer', fontFamily: "'DM Mono', monospace", fontSize: '0.75rem', fontWeight: page === p ? 700 : 400, borderRadius: 0 }}>
+                        style={{ background: page === p ? '#C9A84C' : 'var(--admin-bg-card)', border: 'none', color: page === p ? 'var(--admin-text-primary)' : 'var(--admin-text-secondary)', padding: '6px 12px', cursor: 'pointer', fontFamily: "'DM Mono', monospace", fontSize: '0.75rem', fontWeight: page === p ? 700 : 400, borderRadius: 0 }}>
                         {p}
                       </button>
                     );
                   })}
                   <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                    style={{ background: '#1C2640', border: 'none', color: page === totalPages ? '#2A3D5C' : '#7A8BA8', padding: '6px 10px', cursor: page === totalPages ? 'default' : 'pointer', borderRadius: 0 }}>
+                    style={{ background: 'var(--admin-bg-card)', border: 'none', color: page === totalPages ? 'var(--admin-border-light)' : 'var(--admin-text-secondary)', padding: '6px 10px', cursor: page === totalPages ? 'default' : 'pointer', borderRadius: 0 }}>
                     <ChevronRight size={14} />
                   </button>
                 </div>

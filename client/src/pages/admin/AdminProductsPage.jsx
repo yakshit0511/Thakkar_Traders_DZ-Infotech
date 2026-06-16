@@ -17,7 +17,7 @@ const PRODUCT_CATEGORIES = [
 
 /* ── Toggle Switch ─────────────────────────────────────────────────────── */
 const Toggle = ({ checked, onChange }) => (
-  <div onClick={() => onChange(!checked)} style={{ width: 44, height: 24, borderRadius: 100, background: checked ? '#2ECC71' : '#1C2640', position: 'relative', cursor: 'pointer', transition: 'background 0.25s', flexShrink: 0 }}>
+  <div onClick={() => onChange(!checked)} style={{ width: 44, height: 24, borderRadius: 100, background: checked ? 'var(--admin-success)' : 'var(--admin-bg-card)', position: 'relative', cursor: 'pointer', transition: 'background 0.25s', flexShrink: 0 }}>
     <div style={{ position: 'absolute', top: 3, left: checked ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left 0.25s' }} />
   </div>
 );
@@ -34,18 +34,18 @@ const TagInput = ({ tags, onChange, placeholder, maxTags = 10 }) => {
     if (e.key === 'Backspace' && !input && tags.length) onChange(tags.slice(0, -1));
   };
   return (
-    <div style={{ background: '#0F1520', border: '1px solid #1F2D45', padding: '8px 10px', minHeight: 44, display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', cursor: 'text', borderRadius: 0 }}
+    <div style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)', padding: '8px 10px', minHeight: 44, display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', cursor: 'text', borderRadius: 0 }}
       onClick={() => document.getElementById('tag-input-' + placeholder)?.focus()}>
       {tags.map((t, i) => (
-        <span key={i} style={{ background: '#1C2640', border: '1px solid #2A3D5C', color: '#E8EDF5', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', padding: '3px 8px', display: 'flex', alignItems: 'center', gap: 6, borderRadius: 0 }}>
+        <span key={i} style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border-light)', color: 'var(--admin-text-primary)', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', padding: '3px 8px', display: 'flex', alignItems: 'center', gap: 6, borderRadius: 0 }}>
           {t}
           <button onClick={e => { e.stopPropagation(); onChange(tags.filter((_, idx) => idx !== i)); }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8BA8', padding: 0, display: 'flex', lineHeight: 1 }}><X size={10} /></button>
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-text-secondary)', padding: 0, display: 'flex', lineHeight: 1 }}><X size={10} /></button>
         </span>
       ))}
       <input id={'tag-input-' + placeholder} value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKey}
         placeholder={tags.length === 0 ? placeholder : ''}
-        style={{ background: 'none', border: 'none', outline: 'none', color: '#E8EDF5', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem', minWidth: 120, flex: 1, borderRadius: 0 }} />
+        style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--admin-text-primary)', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem', minWidth: 120, flex: 1, borderRadius: 0 }} />
     </div>
   );
 };
@@ -53,19 +53,19 @@ const TagInput = ({ tags, onChange, placeholder, maxTags = 10 }) => {
 /* Delete Dialog */
 const DeleteDialog = ({ name, onCancel, onConfirm, loading }) => (
   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-    style={{ position: 'fixed', inset: 0, zIndex: 400, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+    style={{ position: 'fixed', inset: 0, zIndex: 400, background: 'rgba(15,23,42,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
     onClick={onCancel}>
     <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
       onClick={e => e.stopPropagation()}
-      style={{ background: '#151D2E', border: '1px solid #1F2D45', padding: 32, maxWidth: 400, width: '100%', textAlign: 'center', borderRadius: 0 }}>
-      <Trash2 size={32} color="#E74C3C" style={{ margin: '0 auto 16px' }} />
-      <p style={{ fontSize: '1rem', fontWeight: 600, color: '#E8EDF5', fontFamily: "'Inter', sans-serif", marginBottom: 8 }}>DELETE PRODUCT</p>
-      <p style={{ fontSize: '0.85rem', fontWeight: 300, color: '#7A8BA8', fontFamily: "'Inter', sans-serif", marginBottom: 28, lineHeight: 1.6 }}>
-        This will permanently delete <strong style={{ color: '#E8EDF5' }}>{name}</strong>. This action cannot be undone.
+      style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', padding: 32, maxWidth: 400, width: '100%', textAlign: 'center', borderRadius: 0 }}>
+      <Trash2 size={32} color="var(--admin-danger)" style={{ margin: '0 auto 16px' }} />
+      <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--admin-text-primary)', fontFamily: "'Inter', sans-serif", marginBottom: 8 }}>DELETE PRODUCT</p>
+      <p style={{ fontSize: '0.85rem', fontWeight: 300, color: 'var(--admin-text-secondary)', fontFamily: "'Inter', sans-serif", marginBottom: 28, lineHeight: 1.6 }}>
+        This will permanently delete <strong style={{ color: 'var(--admin-text-primary)' }}>{name}</strong>. This action cannot be undone.
       </p>
       <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-        <button onClick={onCancel} style={{ background: '#1C2640', color: '#7A8BA8', border: '1px solid #2A3D5C', padding: '12px 24px', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', cursor: 'pointer', borderRadius: 0 }}>CANCEL</button>
-        <button onClick={onConfirm} disabled={loading} style={{ background: '#E74C3C', color: '#fff', border: 'none', padding: '12px 24px', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', cursor: 'pointer', opacity: loading ? 0.6 : 1, borderRadius: 0 }}>
+        <button onClick={onCancel} style={{ background: 'var(--admin-bg-card)', color: 'var(--admin-text-secondary)', border: '1px solid var(--admin-border-light)', padding: '12px 24px', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', cursor: 'pointer', borderRadius: 0 }}>CANCEL</button>
+        <button onClick={onConfirm} disabled={loading} style={{ background: 'var(--admin-danger)', color: '#fff', border: 'none', padding: '12px 24px', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', cursor: 'pointer', opacity: loading ? 0.6 : 1, borderRadius: 0 }}>
           {loading ? 'DELETING…' : 'DELETE'}
         </button>
       </div>
@@ -135,23 +135,23 @@ const ProductDrawer = ({ product, onClose, onSaved }) => {
     } finally { setSaving(false); }
   };
 
-  const inputSt = { background: '#0F1520', border: '1px solid #1F2D45', color: '#E8EDF5', padding: '10px 14px', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem', width: '100%', boxSizing: 'border-box', outline: 'none', transition: 'border-color 0.2s', borderRadius: 0 };
-  const labelSt = { fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.12em', color: '#7A8BA8', textTransform: 'uppercase', marginBottom: 6, display: 'block' };
+  const inputSt = { background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)', padding: '10px 14px', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem', width: '100%', boxSizing: 'border-box', outline: 'none', transition: 'border-color 0.2s', borderRadius: 0 };
+  const labelSt = { fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.12em', color: 'var(--admin-text-secondary)', textTransform: 'uppercase', marginBottom: 6, display: 'block' };
   const fieldSt = { marginBottom: 20 };
   const focus = e => e.target.style.borderColor = '#C9A84C';
-  const blur  = e => e.target.style.borderColor = '#1F2D45';
+  const blur  = e => e.target.style.borderColor = 'var(--admin-border)';
 
   return (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 195, background: 'rgba(0,0,0,0.6)' }} />
+        onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 195, background: 'rgba(15,23,42,0.12)' }} />
       <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        style={{ position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 200, width: 'min(580px, 100vw)', background: '#0F1520', borderLeft: '1px solid #1F2D45', display: 'flex', flexDirection: 'column', borderRadius: 0 }}>
+        style={{ position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 200, width: 'min(580px, 100vw)', background: 'var(--admin-bg-card)', borderLeft: '1px solid var(--admin-border)', display: 'flex', flexDirection: 'column', borderRadius: 0 }}>
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 28px', borderBottom: '1px solid #1F2D45', flexShrink: 0 }}>
-          <span style={{ fontSize: '0.65rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.2em', color: '#7A8BA8' }}>{isEdit ? 'EDIT PRODUCT' : 'ADD PRODUCT'}</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8BA8' }}><X size={18} /></button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 28px', borderBottom: '1px solid var(--admin-border)', flexShrink: 0 }}>
+          <span style={{ fontSize: '0.65rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.2em', color: 'var(--admin-text-secondary)' }}>{isEdit ? 'EDIT PRODUCT' : 'ADD PRODUCT'}</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-text-secondary)' }}><X size={18} /></button>
         </div>
 
         {/* Scrollable form */}
@@ -170,7 +170,7 @@ const ProductDrawer = ({ product, onClose, onSaved }) => {
             <label style={labelSt}>Description *</label>
             <textarea value={form.description} onChange={e => set('description', e.target.value)}
               style={{ ...inputSt, minHeight: 100, resize: 'vertical' }} placeholder="Product description…" onFocus={focus} onBlur={blur} />
-            <p style={{ fontSize: '0.62rem', fontFamily: "'DM Mono', monospace", color: '#4A5A72', marginTop: 4 }}>{form.description.length} of 500 characters</p>
+            <p style={{ fontSize: '0.62rem', fontFamily: "'DM Mono', monospace", color: 'var(--admin-text-tertiary)', marginTop: 4 }}>{form.description.length} of 500 characters</p>
           </div>
           <div style={fieldSt}>
             <label style={labelSt}>Brands (press Enter to add, max 10)</label>
@@ -183,7 +183,7 @@ const ProductDrawer = ({ product, onClose, onSaved }) => {
           <div style={fieldSt}>
             <label style={labelSt}>Display Order</label>
             <input type="number" value={form.displayOrder} onChange={e => set('displayOrder', +e.target.value)} style={{ ...inputSt, width: 120 }} onFocus={focus} onBlur={blur} />
-            <p style={{ fontSize: '0.75rem', fontWeight: 300, color: '#4A5A72', fontFamily: "'Inter', sans-serif", marginTop: 4 }}>Lower numbers appear first</p>
+            <p style={{ fontSize: '0.75rem', fontWeight: 300, color: 'var(--admin-text-tertiary)', fontFamily: "'Inter', sans-serif", marginTop: 4 }}>Lower numbers appear first</p>
           </div>
 
           {/* Image */}
@@ -193,7 +193,7 @@ const ProductDrawer = ({ product, onClose, onSaved }) => {
               <div style={{ position: 'relative', marginBottom: 8 }}>
                 <img src={imagePreview} alt="" style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block', borderRadius: 0 }} />
                 <button onClick={() => fileRef.current?.click()}
-                  style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '8px', background: 'rgba(0,0,0,0.6)', border: 'none', color: '#E8EDF5', fontFamily: "'DM Mono', monospace", fontSize: '0.62rem', letterSpacing: '0.1em', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 0 }}>
+                  style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '8px', background: 'rgba(15,23,42,0.12)', border: 'none', color: 'var(--admin-text-primary)', fontFamily: "'DM Mono', monospace", fontSize: '0.62rem', letterSpacing: '0.1em', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 0 }}>
                   <Upload size={12} /> CHANGE IMAGE
                 </button>
               </div>
@@ -202,29 +202,29 @@ const ProductDrawer = ({ product, onClose, onSaved }) => {
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={onDrop}
                 onClick={() => fileRef.current?.click()}
-                style={{ border: `2px dashed ${isDragging ? '#C9A84C' : '#2A3D5C'}`, background: isDragging ? 'rgba(201,168,76,0.05)' : '#151D2E', padding: 32, textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s', borderRadius: 0 }}>
-                <Upload size={24} color={isDragging ? '#C9A84C' : '#4A5A72'} style={{ margin: '0 auto 8px' }} />
-                <p style={{ color: '#7A8BA8', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem' }}>Drag and drop or click to select image</p>
+                style={{ border: `2px dashed ${isDragging ? '#C9A84C' : 'var(--admin-border-light)'}`, background: isDragging ? 'rgba(201,168,76,0.08)' : 'var(--admin-bg-elevated)', padding: 32, textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s', borderRadius: 0 }}>
+                <Upload size={24} color={isDragging ? '#C9A84C' : 'var(--admin-text-tertiary)'} style={{ margin: '0 auto 8px' }} />
+                <p style={{ color: 'var(--admin-text-secondary)', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem' }}>Drag and drop or click to select image</p>
               </div>
             )}
             <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={onFileChange} />
-            <p style={{ fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", color: '#4A5A72', marginTop: 6 }}>Recommended size 800 by 600 pixels, JPG or PNG</p>
+            <p style={{ fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", color: 'var(--admin-text-tertiary)', marginTop: 6 }}>Recommended size 800 by 600 pixels, JPG or PNG</p>
           </div>
 
           {/* Active toggle */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
             <Toggle checked={form.isActive} onChange={v => set('isActive', v)} />
             <div>
-              <p style={{ margin: 0, fontSize: '0.83rem', color: '#E8EDF5', fontFamily: "'Inter', sans-serif" }}>VISIBLE ON PUBLIC SITE</p>
-              <p style={{ margin: '2px 0 0', fontSize: '0.75rem', fontWeight: 300, color: '#4A5A72', fontFamily: "'Inter', sans-serif" }}>Inactive products are hidden from visitors</p>
+              <p style={{ margin: 0, fontSize: '0.83rem', color: 'var(--admin-text-primary)', fontFamily: "'Inter', sans-serif" }}>VISIBLE ON PUBLIC SITE</p>
+              <p style={{ margin: '2px 0 0', fontSize: '0.75rem', fontWeight: 300, color: 'var(--admin-text-tertiary)', fontFamily: "'Inter', sans-serif" }}>Inactive products are hidden from visitors</p>
             </div>
           </div>
         </div>
 
         {/* Sticky footer */}
-        <div style={{ padding: '20px 28px', background: '#0F1520', borderTop: '1px solid #1F2D45', flexShrink: 0, display: 'flex', gap: 12 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid #2A3D5C', color: '#7A8BA8', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', cursor: 'pointer', borderRadius: 0 }}>CANCEL</button>
-          <button onClick={handleSave} disabled={saving} style={{ flex: 2, padding: '12px', background: '#C9A84C', color: '#0A0F1E', border: 'none', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', opacity: saving ? 0.7 : 1, borderRadius: 0 }}>
+        <div style={{ padding: '20px 28px', background: 'var(--admin-bg-card)', borderTop: '1px solid var(--admin-border)', flexShrink: 0, display: 'flex', gap: 12 }}>
+          <button onClick={onClose} style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid var(--admin-border-light)', color: 'var(--admin-text-secondary)', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', cursor: 'pointer', borderRadius: 0 }}>CANCEL</button>
+          <button onClick={handleSave} disabled={saving} style={{ flex: 2, padding: '12px', background: '#C9A84C', color: 'var(--admin-text-primary)', border: 'none', fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', opacity: saving ? 0.7 : 1, borderRadius: 0 }}>
             {saving ? 'SAVING…' : 'SAVE PRODUCT'}
           </button>
         </div>
@@ -288,19 +288,19 @@ const AdminProductsPage = () => {
     finally { setDeleting(false); setDeleteTarget(null); }
   };
 
-  const inputSt = { background: '#0F1520', border: '1px solid #1F2D45', color: '#E8EDF5', padding: '10px 14px', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem', outline: 'none', borderRadius: 0 };
+  const inputSt = { background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)', color: 'var(--admin-text-primary)', padding: '10px 14px', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem', outline: 'none', borderRadius: 0 };
 
   return (
     <AdminLayout title="Products">
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#E8EDF5', fontFamily: "'Inter', sans-serif", margin: 0 }}>PRODUCT CATALOGUE</h1>
-          <p style={{ fontSize: '0.82rem', fontWeight: 300, color: '#7A8BA8', fontFamily: "'DM Mono', monospace", marginTop: 4 }}>{products.length} products in catalogue</p>
+          <h1 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--admin-text-primary)', fontFamily: "'Inter', sans-serif", margin: 0 }}>PRODUCT CATALOGUE</h1>
+          <p style={{ fontSize: '0.82rem', fontWeight: 300, color: 'var(--admin-text-secondary)', fontFamily: "'DM Mono', monospace", marginTop: 4 }}>{products.length} products in catalogue</p>
         </div>
         <button onClick={() => setDrawerProduct(null)}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: '#C9A84C', color: '#0A0F1E', border: 'none', fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.1em', cursor: 'pointer', borderRadius: 0 }}
-          onMouseEnter={e => e.currentTarget.style.background = '#D4B866'}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: '#C9A84C', color: 'var(--admin-text-primary)', border: 'none', fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.1em', cursor: 'pointer', borderRadius: 0 }}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-accent-hover)'}
           onMouseLeave={e => e.currentTarget.style.background = '#C9A84C'}>
           <PlusCircle size={14} /> ADD PRODUCT
         </button>
@@ -309,8 +309,8 @@ const AdminProductsPage = () => {
       {/* Filters */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
         <div style={{ position: 'relative', flex: '1 1 220px' }}>
-          <Search size={13} color="#4A5A72" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products…" style={{ ...inputSt, paddingLeft: 34, width: '100%', boxSizing: 'border-box' }} onFocus={e => e.target.style.borderColor = '#C9A84C'} onBlur={e => e.target.style.borderColor = '#1F2D45'} />
+          <Search size={13} color="var(--admin-text-tertiary)" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products…" style={{ ...inputSt, paddingLeft: 34, width: '100%', boxSizing: 'border-box' }} onFocus={e => e.target.style.borderColor = '#C9A84C'} onBlur={e => e.target.style.borderColor = 'var(--admin-border)'} />
         </div>
         <select value={catFilter} onChange={e => setCatFilter(e.target.value)} style={inputSt}>
           <option value="">ALL CATEGORIES</option>
@@ -324,15 +324,15 @@ const AdminProductsPage = () => {
       </div>
 
       {/* Table */}
-      <div style={{ background: '#151D2E', border: '1px solid #1F2D45', overflow: 'hidden', borderRadius: 0 }}>
+      <div style={{ background: 'var(--admin-bg-elevated)', border: '1px solid var(--admin-border)', overflow: 'hidden', borderRadius: 0 }}>
         {loading ? (
           <div style={{ padding: 40 }}>
-            {[...Array(5)].map((_, i) => <div key={i} style={{ height: 60, background: '#1C2640', marginBottom: 8, opacity: 0.6, borderRadius: 0 }} />)}
+            {[...Array(5)].map((_, i) => <div key={i} style={{ height: 60, background: 'var(--admin-bg-card)', marginBottom: 8, opacity: 0.6, borderRadius: 0 }} />)}
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ padding: 60, textAlign: 'center' }}>
-            <Package size={40} color="#4A5A72" style={{ margin: '0 auto 12px' }} />
-            <p style={{ color: '#7A8BA8', fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>No products found</p>
+            <Package size={40} color="var(--admin-text-tertiary)" style={{ margin: '0 auto 12px' }} />
+            <p style={{ color: 'var(--admin-text-secondary)', fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>No products found</p>
           </div>
         ) : (
           <>
@@ -340,9 +340,9 @@ const AdminProductsPage = () => {
             <div className="hidden md:block" style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #1F2D45', background: '#0F1520' }}>
+                  <tr style={{ borderBottom: '1px solid var(--admin-border)', background: 'var(--admin-bg-card)' }}>
                     {['IMAGE', 'PRODUCT', 'BRANDS', 'STATUS', 'ORDER', 'ACTIONS'].map(h => (
-                      <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.12em', color: '#4A5A72', fontWeight: 600 }}>{h}</th>
+                      <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.6rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.12em', color: 'var(--admin-text-tertiary)', fontWeight: 600 }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -350,32 +350,32 @@ const AdminProductsPage = () => {
                   <AnimatePresence>
                     {filtered.map(p => (
                       <motion.tr key={p._id} layout exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }}
-                        style={{ borderBottom: '1px solid #1F2D45', transition: 'background 0.15s' }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#1C2640'}
+                        style={{ borderBottom: '1px solid var(--admin-border)', transition: 'background 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--admin-bg-card)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                         <td style={{ padding: '12px 16px' }}>
                           {p.featuredImageUrl
                             ? <img src={p.featuredImageUrl} alt="" style={{ width: 56, height: 56, objectFit: 'cover', display: 'block', borderRadius: 0 }} />
-                            : <div style={{ width: 56, height: 56, background: '#1C2640', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 0 }}><Package size={20} color="#4A5A72" /></div>
+                            : <div style={{ width: 56, height: 56, background: 'var(--admin-bg-card)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 0 }}><Package size={20} color="var(--admin-text-tertiary)" /></div>
                           }
                         </td>
                         <td style={{ padding: '12px 16px' }}>
-                          <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 500, color: '#E8EDF5', fontFamily: "'Inter', sans-serif" }}>{p.name}</p>
+                          <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 500, color: 'var(--admin-text-primary)', fontFamily: "'Inter', sans-serif" }}>{p.name}</p>
                           <p style={{ margin: '3px 0 0', fontSize: '0.62rem', fontFamily: "'DM Mono', monospace", letterSpacing: '0.1em', textTransform: 'uppercase', color: '#C9A84C' }}>{PRODUCT_CATEGORIES.find(c => c.value === p.category)?.label || p.category}</p>
                         </td>
-                        <td style={{ padding: '12px 16px', fontSize: '0.82rem', fontWeight: 300, color: '#7A8BA8', fontFamily: "'Inter', sans-serif" }}>
+                        <td style={{ padding: '12px 16px', fontSize: '0.82rem', fontWeight: 300, color: 'var(--admin-text-secondary)', fontFamily: "'Inter', sans-serif" }}>
                           {p.brands?.length ? (p.brands.length > 3 ? p.brands.slice(0, 3).join(', ') + ` and ${p.brands.length - 3} more` : p.brands.join(', ')) : '—'}
                         </td>
                         <td style={{ padding: '12px 16px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             {togglingId === p._id ? (
-                              <div style={{ width: 44, height: 24, background: '#1C2640', borderRadius: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <div style={{ width: 44, height: 24, background: 'var(--admin-bg-card)', borderRadius: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <RefreshCw size={12} className="animate-spin-custom" color="#C9A84C" />
                               </div>
                             ) : (
                               <Toggle checked={p.isActive} onChange={() => handleToggle(p)} />
                             )}
-                            <span style={{ fontSize: '0.7rem', color: p.isActive ? '#2ECC71' : '#7A8BA8', fontFamily: "'DM Mono', monospace" }}>{p.isActive ? 'ACTIVE' : 'INACTIVE'}</span>
+                            <span style={{ fontSize: '0.7rem', color: p.isActive ? 'var(--admin-success)' : 'var(--admin-text-secondary)', fontFamily: "'DM Mono', monospace" }}>{p.isActive ? 'ACTIVE' : 'INACTIVE'}</span>
                           </div>
                         </td>
                         <td style={{ padding: '12px 16px' }}>
@@ -395,8 +395,8 @@ const AdminProductsPage = () => {
                               }
                             }}
                             style={{
-                              width: 60, background: '#0F1520', border: '1px solid #1F2D45',
-                              color: '#E8EDF5', fontFamily: "'DM Mono', monospace", fontSize: '0.75rem',
+                              width: 60, background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)',
+                              color: 'var(--admin-text-primary)', fontFamily: "'DM Mono', monospace", fontSize: '0.75rem',
                               padding: '4px 8px', outline: 'none', borderRadius: 0, textAlign: 'center'
                             }}
                             onFocus={e => e.target.style.borderColor = '#C9A84C'}
@@ -404,12 +404,12 @@ const AdminProductsPage = () => {
                         </td>
                         <td style={{ padding: '12px 16px' }}>
                           <div style={{ display: 'flex', gap: 8 }}>
-                            <button onClick={() => setDrawerProduct(p)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8BA8', display: 'flex', padding: 4, borderRadius: 0 }} title="Edit">
+                            <button onClick={() => setDrawerProduct(p)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-text-secondary)', display: 'flex', padding: 4, borderRadius: 0 }} title="Edit">
                               <Edit3 size={16} />
                             </button>
-                            <button onClick={() => setDeleteTarget(p)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8BA8', display: 'flex', padding: 4, transition: 'color 0.2s', borderRadius: 0 }}
-                              onMouseEnter={e => e.currentTarget.style.color = '#E74C3C'}
-                              onMouseLeave={e => e.currentTarget.style.color = '#7A8BA8'}
+                            <button onClick={() => setDeleteTarget(p)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-text-secondary)', display: 'flex', padding: 4, transition: 'color 0.2s', borderRadius: 0 }}
+                              onMouseEnter={e => e.currentTarget.style.color = 'var(--admin-danger)'}
+                              onMouseLeave={e => e.currentTarget.style.color = 'var(--admin-text-secondary)'}
                               title="Delete"><Trash2 size={16} /></button>
                           </div>
                         </td>
@@ -423,18 +423,18 @@ const AdminProductsPage = () => {
             {/* Mobile cards */}
             <div className="md:hidden" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
               {filtered.map(p => (
-                <div key={p._id} style={{ background: '#0F1520', border: '1px solid #1F2D45', padding: 16, display: 'flex', gap: 12, borderRadius: 0 }}>
+                <div key={p._id} style={{ background: 'var(--admin-bg-card)', border: '1px solid var(--admin-border)', padding: 16, display: 'flex', gap: 12, borderRadius: 0 }}>
                   {p.featuredImageUrl
                     ? <img src={p.featuredImageUrl} alt="" style={{ width: 56, height: 56, objectFit: 'cover', flexShrink: 0, borderRadius: 0 }} />
-                    : <div style={{ width: 56, height: 56, background: '#1C2640', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 0 }}><Package size={20} color="#4A5A72" /></div>
+                    : <div style={{ width: 56, height: 56, background: 'var(--admin-bg-card)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 0 }}><Package size={20} color="var(--admin-text-tertiary)" /></div>
                   }
                   <div style={{ flex: 1 }}>
-                    <p style={{ margin: 0, fontWeight: 500, color: '#E8EDF5', fontFamily: "'Inter', sans-serif", fontSize: '0.88rem' }}>{p.name}</p>
+                    <p style={{ margin: 0, fontWeight: 500, color: 'var(--admin-text-primary)', fontFamily: "'Inter', sans-serif", fontSize: '0.88rem' }}>{p.name}</p>
                     <p style={{ margin: '3px 0 8px', fontSize: '0.62rem', fontFamily: "'DM Mono', monospace", color: '#C9A84C', textTransform: 'uppercase' }}>{p.category}</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <Toggle checked={p.isActive} onChange={() => handleToggle(p)} />
-                      <button onClick={() => setDrawerProduct(p)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8BA8', display: 'flex', borderRadius: 0 }}><Edit3 size={15} /></button>
-                      <button onClick={() => setDeleteTarget(p)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E74C3C', display: 'flex', borderRadius: 0 }}><Trash2 size={15} /></button>
+                      <button onClick={() => setDrawerProduct(p)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-text-secondary)', display: 'flex', borderRadius: 0 }}><Edit3 size={15} /></button>
+                      <button onClick={() => setDeleteTarget(p)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-danger)', display: 'flex', borderRadius: 0 }}><Trash2 size={15} /></button>
                     </div>
                   </div>
                 </div>

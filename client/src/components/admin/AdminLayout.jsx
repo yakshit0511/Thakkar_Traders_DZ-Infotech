@@ -51,20 +51,20 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-[var(--admin-bg-card)] border-r border-[var(--admin-border)]">
+    <div className="flex flex-col h-full bg-[#FFFFFF] border-r border-[var(--admin-border)]">
       {/* Brand Header */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-[var(--admin-border)]">
         <div
           style={{
-            background: 'linear-gradient(145deg, #263A5E 0%, #1C2E4E 100%)',
-            border: '1px solid rgba(201,168,76,0.28)',
+            background: 'linear-gradient(145deg, #F1E8D8 0%, #E8DCC9 100%)',
+            border: '1px solid rgba(201,168,76,0.3)',
             borderRadius: '10px',
             padding: '5px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
           }}
         >
           <img
@@ -75,12 +75,12 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
               width: '36px',
               objectFit: 'contain',
               display: 'block',
-              filter: 'brightness(1.15) saturate(1.08)',
+              filter: 'brightness(0.8) saturate(1.1)',
             }}
           />
         </div>
         <div>
-          <h1 className="text-sm font-bold tracking-wider text-[var(--admin-text-primary)]">THAKKAR</h1>
+          <h1 className="text-sm font-bold tracking-wider text-[#111827]">THAKKAR</h1>
           <p className="text-[10px] font-semibold tracking-widest text-[var(--admin-accent)]">CONTROL PANEL</p>
         </div>
       </div>
@@ -98,8 +98,8 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
               to={item.path}
               onClick={() => setIsSidebarOpen(false)}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${isActive
-                  ? 'bg-[var(--admin-accent)] text-[#080C14] font-semibold shadow-lg shadow-[var(--admin-accent)]/10'
-                  : 'text-[var(--admin-text-secondary)] hover:bg-[var(--admin-bg-elevated)] hover:text-[var(--admin-text-primary)]'
+                  ? 'bg-[var(--admin-accent)] text-[#FFFFFF] font-semibold shadow-lg shadow-[var(--admin-accent)]/15'
+                  : 'text-[#6B7280] hover:bg-[var(--admin-bg-elevated)] hover:text-[#111827]'
                 }`}
             >
               <Icon className="h-4.5 w-4.5" />
@@ -110,23 +110,23 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
       </nav>
 
       {/* User profile & logout footer */}
-      <div className="p-4 border-t border-[var(--admin-border)] bg-[var(--admin-bg-deep)]/40">
+      <div className="p-4 border-t border-[var(--admin-border)] bg-[#F8F9FA]">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-[var(--admin-bg-elevated)] border border-[var(--admin-border)] flex items-center justify-center">
               <User className="h-4 w-4 text-[var(--admin-accent)]" />
             </div>
             <div className="overflow-hidden">
-              <p className="text-xs font-semibold text-[var(--admin-text-primary)] truncate max-w-[100px]">
+              <p className="text-xs font-semibold text-[#111827] truncate max-w-[100px]">
                 {username || 'Administrator'}
               </p>
-              <p className="text-[10px] text-[var(--admin-text-secondary)]">Online</p>
+              <p className="text-[10px] text-[#6B7280]">Online</p>
             </div>
           </div>
           <Link
             to="/"
             target="_blank"
-            className="p-1.5 rounded-md text-[var(--admin-text-secondary)] hover:bg-[var(--admin-bg-elevated)] hover:text-[var(--admin-text-primary)] transition"
+            className="p-1.5 rounded-md text-[#6B7280] hover:bg-[var(--admin-bg-elevated)] hover:text-[#111827] transition"
             title="View Live Website"
           >
             <ExternalLink className="h-4 w-4" />
@@ -135,7 +135,7 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
 
         <button
           onClick={handleLogout}
-          className="flex items-center justify-center gap-2 w-full px-4 py-2 text-xs font-semibold text-[var(--admin-danger)] bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg transition"
+          className="flex items-center justify-center gap-2 w-full px-4 py-2 text-xs font-semibold text-[#DC2626] bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 rounded-lg transition"
         >
           <LogOut className="h-3.5 w-3.5" />
           <span>Sign Out</span>
@@ -145,7 +145,7 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
   );
 
   return (
-    <div className="admin-theme min-h-screen bg-[var(--admin-bg-deep)]">
+    <div className="admin-theme min-h-screen bg-[#F8F9FA]">
       {/* ── Offline Banner ── */}
       {!isOnline && (
         <div
@@ -155,8 +155,8 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
             left: 0,
             right: 0,
             zIndex: 9999,
-            background: 'linear-gradient(90deg, #1a0800 0%, #2d1500 50%, #1a0800 100%)',
-            borderBottom: '1px solid rgba(201,168,76,0.4)',
+            background: 'linear-gradient(90deg, #FEF2F2 0%, #FCE7E7 50%, #FEF2F2 100%)',
+            borderBottom: '1px solid #FECACA',
             padding: '0.55rem 1.5rem',
             display: 'flex',
             alignItems: 'center',
@@ -164,8 +164,8 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
             gap: '0.625rem',
           }}
         >
-          <WifiOff style={{ width: '14px', height: '14px', color: '#C9A84C', flexShrink: 0 }} />
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', color: '#C9A84C', margin: 0 }}>
+          <WifiOff style={{ width: '14px', height: '14px', color: '#DC2626', flexShrink: 0 }} />
+          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', color: '#991B1B', margin: 0 }}>
             YOU ARE OFFLINE — Changes will not be saved until connection is restored.
           </p>
         </div>
@@ -199,7 +199,7 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
               {/* Close Button overlay */}
               <button
                 onClick={() => setIsSidebarOpen(false)}
-                className="absolute top-4 right-[-3rem] p-2 bg-[var(--admin-bg-card)] border border-[var(--admin-border)] rounded-md text-[var(--admin-text-primary)] md:hidden hover:bg-[var(--admin-bg-elevated)]"
+                className="absolute top-4 right-[-3rem] p-2 bg-[#FFFFFF] border border-[var(--admin-border)] rounded-md text-[#111827] md:hidden hover:bg-[var(--admin-bg-elevated)]"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -211,22 +211,22 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
       {/* Main workspace layout */}
       <div className="flex flex-col min-h-screen md:pl-64">
         {/* Header bar */}
-        <header className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-[var(--admin-bg-deep)]/80 backdrop-blur-md border-b border-[var(--admin-border)]">
+        <header className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-[#FFFFFF]/80 backdrop-blur-md border-b border-[var(--admin-border)]">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="p-2 rounded-lg md:hidden border border-[var(--admin-border)] bg-[var(--admin-bg-card)] text-[var(--admin-text-primary)] hover:bg-[var(--admin-bg-elevated)]"
+              className="p-2 rounded-lg md:hidden border border-[var(--admin-border)] bg-[#FFFFFF] text-[#111827] hover:bg-[var(--admin-bg-elevated)]"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <h2 className="text-xl font-bold tracking-tight text-[var(--admin-text-primary)] font-sans">
+            <h2 className="text-xl font-bold tracking-tight text-[#111827] font-sans">
               {title}
             </h2>
           </div>
 
           <div className="flex items-center gap-3">
             {/* Simple status badge */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--admin-border)] bg-[var(--admin-bg-card)] text-xs text-[var(--admin-text-secondary)] font-medium">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--admin-border)] bg-[#F1F3F5] text-xs text-[#6B7280] font-medium">
               <span className="w-2 h-2 rounded-full bg-[var(--admin-success)] animate-pulse" />
               <span>Workspace Active</span>
             </div>

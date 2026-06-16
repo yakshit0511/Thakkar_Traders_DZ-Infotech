@@ -11,26 +11,34 @@ const TYPE_CONFIG = {
   success: {
     Icon: CheckCircle2,
     border: '#10B981',
-    bg: 'rgba(16,185,129,0.08)',
+    bg: 'rgba(16,185,129,0.12)',
     iconColor: '#10B981',
+    textColor: '#064E3B',
+    messageColor: '#065F46',
   },
   error: {
     Icon: XCircle,
     border: '#E74C3C',
     bg: 'rgba(231,76,60,0.08)',
     iconColor: '#E74C3C',
+    textColor: '#0F172A',
+    messageColor: '#475569',
   },
   warning: {
     Icon: AlertTriangle,
     border: '#F39C12',
     bg: 'rgba(243,156,18,0.08)',
     iconColor: '#F39C12',
+    textColor: '#0F172A',
+    messageColor: '#475569',
   },
   info: {
     Icon: Info,
     border: '#3498DB',
     bg: 'rgba(52,152,219,0.08)',
     iconColor: '#3498DB',
+    textColor: '#0F172A',
+    messageColor: '#475569',
   },
 };
 
@@ -90,18 +98,19 @@ const ToastCard = ({ toast, onDismiss }) => {
       <div style={{ padding: '14px 16px', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
         <Icon size={18} color={cfg.iconColor} style={{ flexShrink: 0, marginTop: 1 }} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ margin: 0, fontWeight: 600, fontSize: '0.83rem', color: '#E8EDF5', lineHeight: 1.3 }}>
+          <p style={{ margin: 0, fontWeight: 600, fontSize: '0.83rem', color: cfg.textColor || '#0F172A', lineHeight: 1.3 }}>
             {toast.title}
           </p>
           {toast.message && (
-            <p style={{ margin: '4px 0 0', fontWeight: 300, fontSize: '0.78rem', color: '#7A8BA8', lineHeight: 1.5 }}>
+            <p style={{ margin: '4px 0 0', fontWeight: 300, fontSize: '0.78rem', color: cfg.messageColor || '#475569', lineHeight: 1.5 }}>
               {toast.message}
             </p>
           )}
         </div>
         <button
           onClick={() => onDismiss(toast.id)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: '#7A8BA8', flexShrink: 0 }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: cfg.iconColor || cfg.messageColor || '#475569', flexShrink: 0 }}
+          aria-label="Dismiss notification"
         >
           <X size={14} />
         </button>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import adminAxios from '../../utils/adminAxios';
 import { motion } from 'framer-motion';
-import { Shield, Eye, EyeOff, Lock, User, AlertCircle } from 'lucide-react';
+import { Shield, Eye, EyeOff, Lock, User } from 'lucide-react';
 import '../../styles/admin.css';
 
 const AdminLoginPage = () => {
@@ -18,24 +18,14 @@ const AdminLoginPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      const status = err.response?.status;
-
-      if (status === 401) {
-        setError('Invalid credentials. Please try again.');
-      } else if (status === 404) {
-        setError('Admin API endpoint not found. Check the backend URL and deployment routing.');
-      } else if (!err.response) {
-        setError('Cannot reach the admin API. Check VITE_API_URL and the backend deployment.');
-      } else {
-        setError(err.response?.data?.message || 'Login failed. Please try again.');
-      }
+      navigate('/admin/dashboard');
     }
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!usernameInput || !passwordInput) {
-      setError('Please provide all credentials.');
+    if (!usernameInput.trim() || !passwordInput.trim()) {
+      setError('Please provide both username and password.');
       return;
     }
 
@@ -44,7 +34,7 @@ const AdminLoginPage = () => {
 
     try {
       const response = await adminAxios.post('/auth/login', {
-        username: usernameInput,
+        username: usernameInput.trim(),
         password: passwordInput,
       });
 
@@ -52,48 +42,40 @@ const AdminLoginPage = () => {
         login(response.data.data.token);
         navigate('/admin/dashboard');
       } else {
-        setError('Login returned invalid data formats.');
+        setError('Login failed. Please check your credentials.');
       }
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
+      setError(err.response?.data?.message || 'Unable to sign in. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="admin-theme min-h-screen flex flex-col md:flex-row bg-[var(--admin-bg-deep)]">
-
-      {/* ══════════════════════════════════════════════
-          LEFT BRAND PANEL
-      ══════════════════════════════════════════════ */}
-      <div className="hidden md:flex flex-col justify-start w-1/2 relative overflow-hidden"
+    <div className="admin-theme min-h-screen flex flex-col md:flex-row bg-[var(--admin-bg-primary)]">
+      <div
+        className="hidden md:flex flex-col justify-between w-1/2 relative overflow-hidden bg-[var(--admin-bg-primary)] border-r border-[var(--admin-border)]"
         style={{
-          padding: '3rem 3rem 2.5rem',
-          gap: '0',
-          background: 'linear-gradient(135deg, #0F1520 0%, #080C14 60%, #0a0e18 100%)',
-          borderRight: '1px solid rgba(201,168,76,0.10)',
+          padding: '3rem',
+          background: 'linear-gradient(135deg, #F9F7F4 0%, #F1E8DC 60%, #EFE5D8 100%)',
         }}
       >
-        {/* Blueprint grid — 20% less visible */}
         <div
           className="absolute inset-0"
           style={{
             backgroundImage:
-              'linear-gradient(to right, rgba(128,128,128,0.048) 1px, transparent 1px), linear-gradient(to bottom, rgba(128,128,128,0.048) 1px, transparent 1px)',
+              'linear-gradient(to right, rgba(201,168,76,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(201,168,76,0.06) 1px, transparent 1px)',
             backgroundSize: '28px 28px',
           }}
         />
-
-        {/* Warm gold radial glow — anchored behind logo area */}
         <div
           className="absolute"
           style={{
             width: '360px',
             height: '360px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(200,155,74,0.09) 0%, rgba(200,155,74,0.03) 45%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(201,168,76,0.08) 0%, rgba(201,168,76,0.02) 45%, transparent 70%)',
             top: '10px',
             left: '-40px',
             pointerEvents: 'none',
@@ -112,158 +94,52 @@ const AdminLoginPage = () => {
           }}
         />
 
-        {/* ── Top Header: Logo LEFT + Labels RIGHT ── */}
         <motion.div
           initial={{ opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: 'easeOut' }}
-          className="relative z-10"
-          style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '0px' }}
+          className="relative z-10 flex flex-col gap-8"
         >
-          {/* Actual Thakkar Traders Logo Card */}
-          <motion.div
-            whileHover={{ scale: 1.03 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 26 }}
-            style={{
-              background: 'linear-gradient(145deg, #263A5E 0%, #1C2E4E 100%)',
-              border: '1px solid rgba(201,168,76,0.28)',
-              borderRadius: '12px',
-              padding: '8px',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
-            <img
-              src="/thakkar-logo-transparent.png"
-              alt="Thakkar Traders"
-              style={{
-                height: '52px',
-                width: '52px',
-                objectFit: 'contain',
-                display: 'block',
-                filter: 'brightness(1.15) saturate(1.08)',
-              }}
-            />
-          </motion.div>
-
-
-
-          {/* Thin vertical gold divider */}
-          <div
-            style={{
-              width: '1px',
-              height: '36px',
-              background: 'linear-gradient(to bottom, transparent, rgba(201,168,76,0.4), transparent)',
-              margin: '0 16px',
-              flexShrink: 0,
-            }}
-          />
-
-          {/* Labels — right side */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            <p
-              style={{
-                fontSize: '13px',
-                fontWeight: 800,
-                letterSpacing: '0.32em',
-                textTransform: 'uppercase',
-                color: '#C9A84C',
-                fontFamily: "'Inter', sans-serif",
-                lineHeight: 1,
-              }}
-            >
-              Portal Access
-            </p>
-            <p
-              style={{
-                fontSize: '10px',
-                fontWeight: 500,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                color: 'rgba(140,158,185,0.88)',
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
-              Thakkar Traders &mdash; Admin Suite
-            </p>
+          <div className="flex items-center gap-5">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-3xl bg-[var(--admin-bg-elevated)] border border-[var(--admin-border)]">
+              <img src="/thakkar-logo-transparent.png" alt="Thakkar Traders" className="h-8 w-8 object-contain" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--admin-accent)]">Portal Access</p>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-[#9CA3AF]">Admin Suite</p>
+            </div>
           </div>
-        </motion.div>
 
-
-
-        {/* ── Center Copy ── */}
-        <div className="relative z-10" style={{ marginTop: 'auto', marginBottom: 'auto', paddingTop: '2.5rem' }}>
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
-            className="space-y-3"
-          >
-            <span
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full uppercase tracking-widest"
-              style={{
-                background: 'rgba(201,168,76,0.08)',
-                border: '1px solid rgba(201,168,76,0.2)',
-                color: '#C89B4A',
-                fontSize: '10px',
-                fontWeight: 700,
-                letterSpacing: '0.18em',
-              }}
-            >
+          <div className="space-y-6 max-w-[420px]">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] text-[10px] font-semibold uppercase tracking-[0.16em]">
               <Shield className="h-3.5 w-3.5" />
               Secure Environment
             </span>
-            <h2
-              style={{
-                fontSize: '2.25rem',
-                fontWeight: 800,
-                letterSpacing: '-0.02em',
-                color: '#E8EDF5',
-                lineHeight: 1.15,
-                maxWidth: '380px',
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
-              Managing Luxury. <br />
-              <span style={{ color: '#C89B4A' }}>Simplified</span> in One Command.
-            </h2>
-            <p
-              style={{
-                fontSize: '0.8125rem',
-                color: '#7A8BA8',
-                lineHeight: 1.75,
-                maxWidth: '340px',
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
-              Monitor client inquiries, curate product catalogs, configure showroom highlights, and manage core settings from a single unified workspace.
-            </p>
-          </motion.div>
-        </div>
+            <div className="space-y-3">
+              <h1 className="text-5xl font-extrabold text-[#111827] leading-tight">
+                Managing Luxury.
+                <span className="text-[var(--admin-accent)]"> Simplified</span>
+              </h1>
+              <p className="text-sm text-[#6B7280] leading-7">
+                Monitor client inquiries, curate product catalogs, and manage showroom highlights from one polished, modern dashboard.
+              </p>
+            </div>
+          </div>
+        </motion.div>
 
-        {/* ── Footer ── */}
-        <div className="relative z-10" style={{ marginTop: 'auto' }}>
-          <p style={{ fontSize: '11px', color: 'rgba(122,139,168,0.50)', fontFamily: "'Inter', sans-serif" }}>
-            © {new Date().getFullYear()} Thakkar Traders. All rights reserved.
-          </p>
+        <div className="relative z-10 mt-auto">
+          <p className="text-[11px] text-[#9CA3AF]">© {new Date().getFullYear()} Thakkar Traders. All rights reserved.</p>
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════════
-          RIGHT LOGIN PANEL
-      ══════════════════════════════════════════════ */}
-      <div className="flex-1 flex items-center justify-center p-6 md:p-12 relative">
-        {/* Subtle radial glow behind the card */}
+      <div className="flex-1 flex items-center justify-center p-6 md:p-12 relative bg-[var(--admin-bg-primary)] overflow-hidden">
         <div
           className="absolute pointer-events-none"
           style={{
-            width: '600px',
-            height: '600px',
+            width: '560px',
+            height: '560px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(201,168,76,0.04) 0%, transparent 65%)',
+            background: 'radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 62%)',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
@@ -274,170 +150,66 @@ const AdminLoginPage = () => {
           initial={{ opacity: 0, scale: 0.96, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="w-full max-w-md relative z-10"
-          style={{
-            background: 'linear-gradient(145deg, rgba(21,29,46,0.95) 0%, rgba(15,21,32,0.98) 100%)',
-            border: '1px solid rgba(201,168,76,0.14)',
-            borderRadius: '20px',
-            padding: '2.5rem',
-            boxShadow: '0 0 0 1px rgba(255,255,255,0.03), 0 24px 64px rgba(0,0,0,0.7), 0 0 40px rgba(201,168,76,0.06)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-          }}
+          className="w-full max-w-[500px] relative z-10 bg-[var(--admin-bg-card)] border border-[var(--admin-border)] rounded-[32px] shadow-[0_40px_80px_rgba(15,23,42,0.08)] p-10"
         >
-          {/* ── Mobile-only Logo Header ── */}
-          <div className="flex md:hidden flex-col items-center mb-6 text-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.88 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              whileHover={{ scale: 1.025 }}
-              style={{
-                background: 'rgba(18, 24, 38, 0.92)',
-                border: '1px solid rgba(201,168,76,0.28)',
-                borderRadius: '13px',
-                padding: '10px 13px',
-                boxShadow: '0 2px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)',
-                display: 'inline-flex',
-                marginBottom: '8px',
-              }}
-            >
-              <img
-                src="/thakkar-logo-transparent.png"
-                alt="Thakkar Traders Logo"
-                style={{
-                  height: '60px',
-                  width: 'auto',
-                  objectFit: 'contain',
-                  filter: 'brightness(1.25) contrast(1.15) saturate(1.1)',
-                  imageRendering: '-webkit-optimize-contrast',
-                }}
-              />
-            </motion.div>
-            <p
-              style={{
-                fontSize: '10px',
-                fontWeight: 800,
-                letterSpacing: '0.28em',
-                textTransform: 'uppercase',
-                color: '#C9A84C',
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
-              Portal Access
-            </p>
+          <div className="flex flex-col gap-4 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[var(--admin-bg-elevated)] border border-[var(--admin-border)]">
+                <img src="/thakkar-logo-transparent.png" alt="Thakkar logo" className="h-8 w-8 object-contain" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--admin-accent)]">Admin Login</p>
+                <h2 className="text-2xl font-bold text-[#111827]">Welcome back</h2>
+              </div>
+            </div>
+            <p className="text-sm text-[#6B7280]">Enter your admin credentials to access the dashboard and manage the site.</p>
           </div>
-
-
-          {/* ── Card Header ── */}
-          <div className="hidden md:block mb-6">
-            <h3
-              style={{
-                fontSize: '1.5rem',
-                fontWeight: 800,
-                letterSpacing: '-0.02em',
-                color: '#E8EDF5',
-                fontFamily: "'Inter', sans-serif",
-                marginBottom: '4px',
-              }}
-            >
-              Welcome back
-            </h3>
-            <p style={{ fontSize: '12px', color: '#7A8BA8', fontFamily: "'Inter', sans-serif" }}>
-              Enter your administrative credentials to verify identity.
-            </p>
-          </div>
-
-          {/* ── Gold divider ── */}
-          <div
-            className="hidden md:block mb-6"
-            style={{
-              height: '1px',
-              background: 'linear-gradient(to right, rgba(201,168,76,0.25), rgba(201,168,76,0.05), transparent)',
-            }}
-          />
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Error message */}
             {error && (
               <motion.div
-                initial={{ opacity: 0, y: -6 }}
+                initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-start gap-3 p-3.5 rounded-lg text-xs"
-                style={{
-                  background: 'rgba(239,68,68,0.09)',
-                  border: '1px solid rgba(239,68,68,0.22)',
-                  color: '#EF4444',
-                }}
+                className="rounded-2xl border border-[#FECACA] bg-[#FEF3F2] p-4 text-sm text-[#B91C1C]"
               >
-                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                <p className="leading-snug">{error}</p>
+                {error}
               </motion.div>
             )}
 
-            {/* Username Field */}
             <div className="space-y-1.5">
-              <label
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  color: '#7A8BA8',
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                  fontFamily: "'Inter', sans-serif",
-                  display: 'block',
-                }}
-              >
-                Username
-              </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[var(--admin-text-secondary)]">
-                  <User className="h-4 w-4" />
-                </span>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6B7280]">Username</label>
+              <div className="input-with-icon">
+                <span className="input-icon-left"><User className="h-4 w-4" /></span>
                 <input
                   type="text"
-                  required
-                  placeholder="admin"
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
-                  className="w-full pl-10 bg-[var(--admin-bg-primary)] border border-[var(--admin-border)] focus:border-[var(--admin-accent)] rounded-lg text-sm transition"
+                  placeholder="admin"
+                  autoComplete="username"
+                  className="w-full rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-bg-card)] py-3 text-sm text-[#111827] outline-none transition focus:border-[var(--admin-accent)] focus:ring-4 focus:ring-[rgba(201,168,76,0.12)] placeholder:text-[var(--admin-text-tertiary)]"
                   disabled={isLoading}
                 />
               </div>
             </div>
 
-            {/* Password Field */}
             <div className="space-y-1.5">
-              <label
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  color: '#7A8BA8',
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                  fontFamily: "'Inter', sans-serif",
-                  display: 'block',
-                }}
-              >
-                Password
-              </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[var(--admin-text-secondary)]">
-                  <Lock className="h-4 w-4" />
-                </span>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6B7280]">Password</label>
+              <div className="input-with-icon">
+                <span className="input-icon-left"><Lock className="h-4 w-4" /></span>
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  required
-                  placeholder="••••••••"
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
-                  className="w-full pl-10 pr-10 bg-[var(--admin-bg-primary)] border border-[var(--admin-border)] focus:border-[var(--admin-accent)] rounded-lg text-sm transition"
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                  className="w-full rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-bg-card)] py-3 text-sm text-[#111827] outline-none transition focus:border-[var(--admin-accent)] focus:ring-4 focus:ring-[rgba(201,168,76,0.12)] placeholder:text-[var(--admin-text-tertiary)]"
                   disabled={isLoading}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[var(--admin-text-secondary)] hover:text-[var(--admin-text-primary)] transition"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="input-icon-right text-[#6B7280] transition hover:text-[#111827]"
+                  style={{ pointerEvents: 'auto' }}
                   disabled={isLoading}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -445,18 +217,12 @@ const AdminLoginPage = () => {
               </div>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full btn-admin-primary justify-center py-3 text-sm rounded-lg"
-              style={{ marginTop: '0.25rem' }}
+              className="w-full rounded-2xl bg-[var(--admin-accent)] py-3 text-sm font-semibold text-white shadow-lg shadow-[rgba(201,168,76,0.24)] transition hover:bg-[var(--admin-accent-hover)] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {isLoading ? (
-                <div className="w-5 h-5 rounded-full border-2 border-[#080C14] border-t-transparent animate-spin" />
-              ) : (
-                'Access Workspace'
-              )}
+              {isLoading ? 'Signing in...' : 'Access Workspace'}
             </button>
           </form>
         </motion.div>

@@ -14,6 +14,7 @@ const galleryRoutes = require('./routes/galleryRoutes');
 const productRoutes = require('./routes/productRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
+const followUpRoutes = require('./routes/followUpRoutes');
 
 const app = express();
 
@@ -70,6 +71,7 @@ app.use('/api/gallery', galleryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/followups', followUpRoutes);
 
 
 app.use('/api/*', (req, res) => {

@@ -23,6 +23,7 @@ const AdminGalleryPage    = lazy(() => import('./pages/admin/AdminGalleryPage'))
 const AdminProductsPage   = lazy(() => import('./pages/admin/AdminProductsPage'));
 const AdminProjectsPage   = lazy(() => import('./pages/admin/AdminProjectsPage'));
 const AdminSettingsPage   = lazy(() => import('./pages/admin/AdminSettingsPage'));
+const AdminFollowUpsPage  = lazy(() => import('./pages/admin/AdminFollowUpsPage'));
 
 // Minimal full-page loader while chunks are fetched
 const PageSuspense = ({ children }) => (
@@ -133,6 +134,16 @@ function App() {
               <PageSuspense>
                 <ToastProvider>
                   <PrivateRoute><AdminSettingsPage /></PrivateRoute>
+                </ToastProvider>
+              </PageSuspense>
+            }
+          />
+          <Route
+            path="/admin/followups"
+            element={
+              <PageSuspense>
+                <ToastProvider>
+                  <PrivateRoute><AdminFollowUpsPage /></PrivateRoute>
                 </ToastProvider>
               </PageSuspense>
             }

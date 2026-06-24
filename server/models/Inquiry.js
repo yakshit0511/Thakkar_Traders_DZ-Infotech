@@ -73,6 +73,10 @@ const inquirySchema = new mongoose.Schema(
     ipAddress: {
       type: String,
     },
+    followUpCreated: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

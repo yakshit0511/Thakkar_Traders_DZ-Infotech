@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,6 +15,7 @@ import {
   User,
   ExternalLink,
   WifiOff,
+  CalendarClock,
 } from 'lucide-react';
 import '../../styles/admin.css';
 
@@ -24,6 +25,8 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [overdueCount, setOverdueCount] = useState(0);
+  const overdueTimerRef = useRef(null);
 
   useEffect(() => {
     const goOnline  = () => setIsOnline(true);
@@ -36,9 +39,38 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
     };
   }, []);
 
+  // Fetch overdue follow-up count on mount and every 5 minutes
+  useEffect(() => {
+    const fetchOverdue = async () => {
+      try {
+        const token = localStorage.getItem('thakkar_admin_token');
+        if (!token) return;
+        const FALLBACK_API_URL = 'https://thakkar-traders-dz-infotech.onrender.com/api';
+        const configuredApiUrl = import.meta.env.VITE_API_URL;
+        const baseURL =
+          configuredApiUrl && !configuredApiUrl.includes('vercel.app')
+            ? configuredApiUrl
+            : FALLBACK_API_URL;
+        const res = await fetch(`${baseURL}/followups?overdue=true`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          setOverdueCount(json.overdueCount || 0);
+        }
+      } catch {
+        // silently fail — non-critical
+      }
+    };
+    fetchOverdue();
+    overdueTimerRef.current = setInterval(fetchOverdue, 5 * 60 * 1000);
+    return () => clearInterval(overdueTimerRef.current);
+  }, []);
+
   const menuItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Inquiries', path: '/admin/inquiries', icon: Mail },
+    { name: 'CRM / Follow-Ups', path: '/admin/followups', icon: CalendarClock, badge: overdueCount },
     { name: 'Products', path: '/admin/products', icon: Package },
     { name: 'Projects', path: '/admin/projects', icon: FolderGit2 },
     { name: 'Gallery', path: '/admin/gallery', icon: Image },
@@ -103,7 +135,21 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
                 }`}
             >
               <Icon className="h-4.5 w-4.5" />
-              <span>{item.name}</span>
+              <span className="flex-1">{item.name}</span>
+              {item.badge > 0 && (
+                <span style={{
+                  background: '#EF4444',
+                  color: '#fff',
+                  fontSize: '0.65rem',
+                  padding: '2px 6px',
+                  borderRadius: '10px',
+                  fontWeight: 700,
+                  lineHeight: 1,
+                  flexShrink: 0,
+                }}>
+                  {item.badge}
+                </span>
+              )}
             </Link>
           );
         })}

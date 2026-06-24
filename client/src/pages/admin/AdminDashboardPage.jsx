@@ -15,7 +15,10 @@ import {
   CheckCircle,
   Trash2,
   AlertCircle,
-  Settings
+  Settings,
+  CalendarDays,
+  Phone,
+  AlertTriangle,
 } from 'lucide-react';
 import '../../styles/admin.css';
 
@@ -30,6 +33,8 @@ const AdminDashboardPage = () => {
   });
   const [recentInquiries, setRecentInquiries] = useState([]);
   const [error, setError] = useState('');
+  const [crmToday, setCrmToday] = useState([]);
+  const [crmOverdue, setCrmOverdue] = useState([]);
 
   // Count animations
   const productCount = useCountUp(stats.products, 1500, !loading);
@@ -66,6 +71,16 @@ const AdminDashboardPage = () => {
 
       // Keep only first 5 inquiries for preview
       setRecentInquiries(inquiriesRes.data?.data?.slice(0, 5) || []);
+
+      // Fetch CRM follow-up data for widget
+      try {
+        const [todayRes, overdueRes] = await Promise.all([
+          adminAxios.get('/followups?today=true'),
+          adminAxios.get('/followups?overdue=true'),
+        ]);
+        setCrmToday(todayRes.data?.data?.slice(0, 4) || []);
+        setCrmOverdue(overdueRes.data?.data?.slice(0, 4) || []);
+      } catch { /* CRM widget is non-critical */ }
     } catch (err) {
       console.error('Dashboard loading failed:', err);
       setError('Could not retrieve database metrics. Please verify backend state.');
@@ -338,6 +353,69 @@ const AdminDashboardPage = () => {
                 <span className="font-semibold text-[var(--admin-accent)]">Authenticated JWT</span>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CRM Follow-Ups Widget */}
+      <div className="mt-8 bg-[var(--admin-bg-card)] border border-[var(--admin-border)] rounded-xl p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h3 className="text-lg font-bold text-[var(--admin-text-primary)]">CRM Follow-Ups</h3>
+            <p className="text-xs text-[var(--admin-text-secondary)]">Today's schedule and overdue items at a glance.</p>
+          </div>
+          <Link to="/admin/followups" className="flex items-center gap-1 text-xs font-bold text-[var(--admin-accent)] hover:text-[var(--admin-accent-hover)] transition">
+            <span>View All</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Today's Follow-Ups */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--admin-text-secondary)] mb-3">Today's Follow-Ups</p>
+            {crmToday.length === 0 ? (
+              <p className="text-xs text-[var(--admin-text-secondary)] py-4 text-center">No follow-ups today</p>
+            ) : (
+              <div className="space-y-3">
+                {crmToday.map(fu => (
+                  <div key={fu._id} className="flex items-center gap-3 p-3 rounded-lg border border-[var(--admin-border)] hover:bg-[var(--admin-bg-elevated)] transition">
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: fu.priority === 'high' ? '#EF4444' : fu.priority === 'medium' ? '#F59E0B' : '#10B981', flexShrink: 0 }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[var(--admin-text-primary)] truncate">{fu.clientName}</p>
+                      <p className="text-xs text-[var(--admin-text-secondary)]">{fu.followUpType?.replace('-', ' ')} · {fu.followUpTime}</p>
+                    </div>
+                  </div>
+                ))}
+                {crmToday.length >= 4 && (
+                  <Link to="/admin/followups" className="text-xs text-[var(--admin-accent)] font-semibold">View more →</Link>
+                )}
+              </div>
+            )}
+          </div>
+          {/* Overdue */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#EF4444' }}>Overdue</p>
+            {crmOverdue.length === 0 ? (
+              <div className="flex items-center gap-3 py-4 justify-center">
+                <CheckCircle className="h-5 w-5 text-emerald-400" />
+                <p className="text-xs text-emerald-400 font-medium">All caught up</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {crmOverdue.map(fu => {
+                  const daysDiff = Math.floor((Date.now() - new Date(fu.followUpDate).getTime()) / (1000 * 60 * 60 * 24));
+                  return (
+                    <div key={fu._id} className="flex items-center gap-3 p-3 rounded-lg border border-[rgba(239,68,68,0.2)] bg-[rgba(239,68,68,0.04)] hover:bg-[rgba(239,68,68,0.07)] transition">
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#EF4444', flexShrink: 0 }} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-[var(--admin-text-primary)] truncate">{fu.clientName}</p>
+                        <p className="text-xs" style={{ color: '#EF4444' }}>{daysDiff} {daysDiff === 1 ? 'day' : 'days'} overdue</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

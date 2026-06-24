@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import adminAxios from '../../utils/adminAxios';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mail, Search, Trash2, Download, Eye, X, RefreshCw, Phone,
   MessageCircle, CheckCheck, Check, ChevronLeft, ChevronRight, Filter,
-  Calendar, MapPin, AlertCircle
+  Calendar, MapPin, AlertCircle, CalendarPlus
 } from 'lucide-react';
 import { useToast } from '../../components/admin/ToastNotification';
 import '../../styles/admin.css';
@@ -136,6 +137,7 @@ const DetailDrawer = ({ inquiry, onClose, onStatusChange, onDelete }) => {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(inquiry.status);
   const showToast = useToast();
+  const navigate = useNavigate();
 
   const handleStatusPill = async (newStatus) => {
     if (newStatus === currentStatus) return;
@@ -238,6 +240,29 @@ const DetailDrawer = ({ inquiry, onClose, onStatusChange, onDelete }) => {
                 label="SEND EMAIL"
               />
             )}
+            <DrawerButton
+              onClick={() => {
+                const materials = inquiry.materialRequired
+                  ? inquiry.materialRequired.split(',').map(s => s.trim()).filter(Boolean)
+                  : [];
+                const prefill = {
+                  clientName: inquiry.fullName || '',
+                  clientPhone: inquiry.phoneNumber || '',
+                  clientEmail: inquiry.emailAddress || '',
+                  clientCity: inquiry.city || '',
+                  projectName: inquiry.projectType || '',
+                  materialsInterested: materials,
+                  linkedInquiryId: inquiry._id,
+                };
+                onClose();
+                navigate(`/admin/followups?prefill=${encodeURIComponent(JSON.stringify(prefill))}`);
+              }}
+              bg="rgba(201,168,76,0.08)"
+              border="rgba(201,168,76,0.2)"
+              color="#C9A84C"
+              icon={CalendarPlus}
+              label="CREATE FOLLOW-UP"
+            />
           </div>
 
           {/* Status Change */}

@@ -6,7 +6,7 @@ import { fadeUpVariant, useScrollAnimation } from '../../hooks/useScrollAnimatio
 const DEFAULT_PROJECTS = [
   {
     _id: 'placeholder-1',
-    title: 'The Obsidian Villa',
+    title: 'Luxury Residential Bungalow',
     location: 'Surat, Gujarat',
     year: 2024,
     category: 'residential',
@@ -14,7 +14,7 @@ const DEFAULT_PROJECTS = [
   },
   {
     _id: 'placeholder-2',
-    title: 'Sakai Zen Lounge',
+    title: 'Commercial Office Fitout',
     location: 'Ahmedabad, Gujarat',
     year: 2023,
     category: 'commercial',
@@ -22,35 +22,11 @@ const DEFAULT_PROJECTS = [
   },
   {
     _id: 'placeholder-3',
-    title: 'Atelier Residence',
-    location: 'Vadodara, Gujarat',
-    year: 2024,
-    category: 'residential',
-    coverImageUrl: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80',
-  },
-  {
-    _id: 'placeholder-4',
-    title: 'Aura Corporate HQ',
-    location: 'Vadodara, Gujarat',
-    year: 2024,
-    category: 'commercial',
-    coverImageUrl: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=800&q=80',
-  },
-  {
-    _id: 'placeholder-5',
-    title: 'Minimalist Penthouse',
-    location: 'Rajkot, Gujarat',
-    year: 2023,
-    category: 'residential',
-    coverImageUrl: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80',
-  },
-  {
-    _id: 'placeholder-6',
     title: 'Boutique Hotel Lobby',
     location: 'Mumbai, Maharashtra',
     year: 2024,
     category: 'hospitality',
-    coverImageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80',
+    coverImageUrl: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80',
   },
 ];
 
@@ -120,10 +96,11 @@ const ProjectsSection = () => {
         const { data } = await api.get('/projects');
         if (data.success && data.data?.length > 0) {
           const dbProjects = data.data;
-          if (dbProjects.length < 6) {
+          // Pad with defaults to reach exactly 3 projects if there are less in DB
+          if (dbProjects.length < 3) {
             setProjects([...dbProjects, ...DEFAULT_PROJECTS.slice(dbProjects.length)]);
           } else {
-            setProjects(dbProjects.slice(0, 6));
+            setProjects(dbProjects.slice(0, 3));
           }
         } else {
           setProjects(DEFAULT_PROJECTS);
@@ -159,32 +136,29 @@ const ProjectsSection = () => {
           </motion.div>
         </div>
 
-        {/* 3-Column Grid Cards Zone */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {DEFAULT_PROJECTS.map((_, i) => (
-              <div
-                key={i}
-                className="animate-pulse bg-[#DED8CC] w-full aspect-[3/4]"
-              />
-            ))}
-          </div>
-        ) : (
-          <motion.div
-            ref={gridRef}
-            initial="hidden"
-            animate={gridControls}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
-            }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {displayProjects.map((project, index) => (
-              <ProjectCard key={project._id || index} project={project} index={index} />
-            ))}
-          </motion.div>
-        )}
+        {/* 3-Column Grid Cards Zone (Always rendered so useInView triggers correctly) */}
+        <motion.div
+          ref={gridRef}
+          initial="hidden"
+          animate={gridControls}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
+          }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {loading
+            ? DEFAULT_PROJECTS.map((_, i) => (
+                <div
+                  key={i}
+                  className="animate-pulse bg-[#DED8CC] w-full aspect-[3/4]"
+                />
+              ))
+            : displayProjects.map((project, index) => (
+                <ProjectCard key={project._id || index} project={project} index={index} />
+              ))
+          }
+        </motion.div>
       </div>
     </section>
   );

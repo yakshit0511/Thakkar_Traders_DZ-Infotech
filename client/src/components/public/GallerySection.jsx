@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { Plus, X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import api from '../../utils/api';
 
@@ -22,93 +22,179 @@ const FALLBACK_IMAGES = [
   },
   {
     _id: 'fallback-2',
-    imageUrl: '/images/kitchen.png',
-    caption: 'Modern Kitchen with Glossy Acrylic Laminates',
+    imageUrl: '/images/kitchen_1.png',
+    caption: 'Modern Matte Charcoal Kitchen Cabinets',
     category: 'kitchen',
   },
   {
     _id: 'fallback-3',
     imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&auto=format&fit=crop',
-    caption: 'Corporate Office Boardroom with Warm Oak Paneling',
+    caption: 'Minimalist Office Boardroom Table and Veneer Walls',
     category: 'office',
   },
   {
     _id: 'fallback-4',
     imageUrl: '/images/wardrobe.png',
-    caption: 'Dark Veneer Wardrobe for Master Bedroom',
+    caption: 'Acrylic Textured Wardrobe Shutters in Master Bedroom',
     category: 'bedroom',
   },
   {
     _id: 'fallback-5',
     imageUrl: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80&auto=format&fit=crop',
-    caption: 'Premium Exterior Wooden Cladding for Modern Facade',
+    caption: 'Villa Cladding with Weatherproof High-Pressure Laminates',
     category: 'exterior',
   },
   {
     _id: 'fallback-6',
-    imageUrl: '/images/wood_closeup.png',
-    caption: 'Exotic Teak Wood Grain Texture Closeup',
+    imageUrl: '/images/closeup_veneer.png',
+    caption: 'Flitch-Matched Natural Teak Wood Veneer Close-Up',
     category: 'material-closeup',
   },
   {
     _id: 'fallback-7',
     imageUrl: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80&auto=format&fit=crop',
-    caption: 'Living Room TV Unit with Designer Laminate Background',
-    category: 'living-room',
+    caption: 'Warm Cream Fluted Louver TV Backdrop in Bedroom',
+    category: 'bedroom',
   },
   {
     _id: 'fallback-8',
     imageUrl: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80&auto=format&fit=crop',
-    caption: 'Bespoke Oak Veneer Kitchen Island and Cabinetry',
+    caption: 'Open Layout Kitchen with Integrated Solid Surface Countertops',
     category: 'kitchen',
   },
   {
     _id: 'fallback-9',
     imageUrl: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=800&q=80&auto=format&fit=crop',
-    caption: 'Minimalist Office Desk in Solid Ash Wood',
+    caption: 'Corporate Workspace featuring Sound-Absorbing Wood Slat Panels',
     category: 'office',
   },
   {
     _id: 'fallback-10',
-    imageUrl: '/images/wall_cladding.png',
-    caption: 'Contemporary Bedroom Veneer Wall Cladding',
-    category: 'bedroom',
+    imageUrl: '/images/charcoal_louvers.png',
+    caption: 'Abstract Fluted Charcoal Wall Panels with Gold Highlights',
+    category: 'material-closeup',
   },
   {
     _id: 'fallback-11',
     imageUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80&auto=format&fit=crop',
-    caption: 'Weather-Resistant Wooden Accents on Luxury Villa',
-    category: 'exterior',
+    caption: 'Double Height Lobby Clad with Architectural Walnut Veneers',
+    category: 'living-room',
   },
   {
     _id: 'fallback-12',
     imageUrl: 'https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=800&q=80&auto=format&fit=crop',
-    caption: 'BWP Grade Marine Plywood Layered Edges',
-    category: 'material-closeup',
+    caption: 'Exterior Gate detailing using Rust-Proof Decorative Laminates',
+    category: 'exterior',
   },
 ];
 
-const fadeUpVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.215, 0.61, 0.355, 1] },
-  },
+const GalleryItem = ({ image, index, total, openLightbox, openInquiry }) => {
+  const itemRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.matchMedia('(hover: none) or (max-width: 768px)').matches);
+  }, []);
+
+  const isInView = useInView(itemRef, { threshold: 0.15, once: true });
+
+  const { scrollYProgress } = useScroll({
+    target: itemRef,
+    offset: ['start end', 'end start'],
+  });
+
+  // Fade out as it scrolls out of the top of the viewport
+  const itemOpacity = useTransform(scrollYProgress, [0, 0.55, 1], [1, 1, 0]);
+  const imageY = useTransform(scrollYProgress, [0, 1], ['0%', '-15%']);
+
+  return (
+    <motion.div
+      ref={itemRef}
+      style={{ opacity: itemOpacity }}
+      className="relative w-full h-screen overflow-hidden bg-black select-none"
+    >
+      {/* Background Image with parallax */}
+      <motion.div
+        style={{ y: imageY }}
+        className="absolute inset-0 w-full h-[120%] pointer-events-none"
+      >
+        <motion.img
+          src={image.imageUrl}
+          alt={image.caption || 'Gallery Material'}
+          initial={{ scale: isMobile ? 1.05 : 1.1, opacity: 0 }}
+          animate={isInView ? { scale: 1.0, opacity: 1 } : { scale: isMobile ? 1.05 : 1.1, opacity: 0 }}
+          transition={{ duration: 1.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="w-full h-full object-cover object-center"
+        />
+      </motion.div>
+
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-[#080502]/40 z-10 pointer-events-none" />
+
+      {/* Info Overlay (Index, Caption, Actions) */}
+      <div className="absolute inset-0 flex flex-col justify-between p-8 md:p-16 lg:p-24 z-20">
+        
+        {/* Top row: index & category */}
+        <div className="flex justify-between items-center w-full mt-[80px]">
+          <span 
+            style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.5)' }}
+          >
+            {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+          </span>
+          <span 
+            style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', letterSpacing: '0.18em', color: '#C9A84C' }}
+            className="uppercase font-medium"
+          >
+            {image.category?.replace('-', ' ')}
+          </span>
+        </div>
+
+        {/* Center: Caption, View and Inquiry */}
+        <div className="flex flex-col items-center text-center max-w-4xl mx-auto my-auto">
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 0.95, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            className="text-[clamp(1.8rem,4vw,3.8rem)] font-light text-[#F5F0E8] leading-tight"
+          >
+            {image.caption}
+          </motion.h3>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="mt-8 flex items-center gap-6"
+          >
+            <button
+              onClick={() => openLightbox(index)}
+              style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.75rem', letterSpacing: '0.15em' }}
+              className="text-[#F5F0E8] hover:text-[#C9A84C] transition-colors border-b border-white/20 hover:border-[#C9A84C] pb-1 uppercase focus:outline-none"
+            >
+              VIEW FULLSCREEN
+            </button>
+            
+            <button
+              onClick={() => openInquiry(image)}
+              style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.75rem', letterSpacing: '0.15em' }}
+              className="bg-[#C9A84C] hover:bg-[#A8732A] text-white px-6 py-2.5 transition-all uppercase flex items-center gap-2 focus:outline-none"
+            >
+              <Plus size={14} />
+              <span>INQUIRE</span>
+            </button>
+          </motion.div>
+        </div>
+
+        {/* Bottom space empty to balance layout */}
+        <div className="h-4" />
+
+      </div>
+    </motion.div>
+  );
 };
 
 const GallerySection = () => {
-  const galleryRef = useRef(null);
-  
-  // Track scroll progress to fade out the section as it leaves the top of the viewport
-  const { scrollYProgress } = useScroll({
-    target: galleryRef,
-    offset: ['start end', 'end start'],
-  });
-  
-  // Keep opacity fully 1 until 60% scrolled out, then fade to 0
-  const sectionOpacity = useTransform(scrollYProgress, [0, 0.6, 1], [1, 1, 0]);
-
   const [images, setImages] = useState([]);
   const [filteredImages, setFilteredImages] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
@@ -117,6 +203,7 @@ const GallerySection = () => {
   const [inquiryImage, setInquiryImage] = useState(null);
   const [inquirySubmitting, setInquirySubmitting] = useState(false);
   const [inquiryStatus, setInquiryStatus] = useState(null);
+  
   const [inquiryForm, setInquiryForm] = useState({
     fullName: '',
     phoneNumber: '',
@@ -128,6 +215,7 @@ const GallerySection = () => {
     selectedImageUrl: '',
     selectedImageCaption: '',
   });
+  
   const [inquiryErrors, setInquiryErrors] = useState({ fullName: '', phoneNumber: '' });
 
   // Fetch images from API
@@ -159,99 +247,87 @@ const GallerySection = () => {
     }
   }, [activeTab, images]);
 
-  // Lightbox handlers
-  const openLightbox = (index) => {
-    setLightboxIndex(index);
-    document.body.style.overflow = 'hidden';
-  };
+  const openLightbox = (index) => setLightboxIndex(index);
+  const closeLightbox = () => setLightboxIndex(null);
 
   const openInquiry = (image) => {
-    const caption = image.caption || 'Gallery material';
-    const absoluteImageUrl = new URL(image.imageUrl, window.location.origin).toString();
     setInquiryImage(image);
-    setInquiryStatus(null);
-    setInquiryErrors({ fullName: '', phoneNumber: '' });
     setInquiryForm({
       fullName: '',
       phoneNumber: '',
       emailAddress: '',
       city: '',
-      projectType: '',
-      materialRequired: image.category ? image.category.replace(/-/g, ' ') : '',
-      selectedImageUrl: absoluteImageUrl,
-      selectedImageCaption: caption,
-      message: `I am interested in ${caption}. Please share price, quality, brand, availability and any other details.`,
+      projectType: image.category?.toUpperCase() || '',
+      materialRequired: image.caption || '',
+      message: `I'm interested in learning more about this material: "${image.caption || 'Gallery Image'}". Please provide specifications and price details.`,
+      selectedImageUrl: image.imageUrl,
+      selectedImageCaption: image.caption || '',
     });
-    document.body.style.overflow = 'hidden';
+    setInquiryErrors({ fullName: '', phoneNumber: '' });
+    setInquiryStatus(null);
   };
 
-  const closeLightbox = useCallback(() => {
-    setLightboxIndex(null);
-    document.body.style.overflow = '';
-  }, []);
-
-  const closeInquiry = useCallback(() => {
-    setInquiryImage(null);
-    setInquiryStatus(null);
-    document.body.style.overflow = '';
-  }, []);
+  const closeInquiry = () => setInquiryImage(null);
 
   const handleInquiryChange = (e) => {
     const { name, value } = e.target;
     setInquiryForm((prev) => ({ ...prev, [name]: value }));
-    if (inquiryErrors[name]) {
+    if (name === 'fullName' || name === 'phoneNumber') {
       setInquiryErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
   const handleInquirySubmit = async (e) => {
     e.preventDefault();
-    setInquiryStatus(null);
-
     let hasErrors = false;
-    const nextErrors = { fullName: '', phoneNumber: '' };
+    const errors = { fullName: '', phoneNumber: '' };
 
     if (!inquiryForm.fullName.trim()) {
-      nextErrors.fullName = 'Full name is required';
+      errors.fullName = 'Full name is required';
       hasErrors = true;
     }
     if (!inquiryForm.phoneNumber.trim()) {
-      nextErrors.phoneNumber = 'Phone number is required';
+      errors.phoneNumber = 'Phone number is required';
       hasErrors = true;
     }
 
     if (hasErrors) {
-      setInquiryErrors(nextErrors);
+      setInquiryErrors(errors);
       return;
     }
 
     setInquirySubmitting(true);
+    setInquiryStatus(null);
+
     try {
-      const response = await api.post('/inquiries', inquiryForm);
-      if (response.data?.success) {
+      const response = await api.post('/inquiries', {
+        ...inquiryForm,
+        fullName: inquiryForm.fullName,
+        phoneNumber: inquiryForm.phoneNumber,
+        email: inquiryForm.emailAddress,
+        city: inquiryForm.city,
+        notes: inquiryForm.message,
+      });
+
+      if (response.data && response.data.success) {
         setInquiryStatus({
           type: 'success',
-          text: 'Inquiry sent successfully. We will contact you soon.',
+          text: 'Thank you! Your inquiry has been sent successfully. We will contact you soon.',
         });
-        setInquiryForm({
-          fullName: '',
-          phoneNumber: '',
-          emailAddress: '',
-          city: '',
-          projectType: '',
-          materialRequired: inquiryForm.materialRequired,
-          selectedImageUrl: inquiryForm.selectedImageUrl,
-          selectedImageCaption: inquiryForm.selectedImageCaption,
-          message: inquiryForm.message,
-        });
+        setTimeout(() => {
+          closeInquiry();
+        }, 3000);
       } else {
-        throw new Error(response.data?.message || 'Submission failed');
+        setInquiryStatus({
+          type: 'error',
+          text: response.data.message || 'Something went wrong. Please try again.',
+        });
       }
-    } catch (error) {
-      console.error('Gallery inquiry submission error:', error);
+    } catch (err) {
+      console.error('Error submitting inquiry:', err);
       setInquiryStatus({
         type: 'error',
-        text: 'Could not send inquiry right now. Please try again.',
+        text: 'Failed to send inquiry. Please check your connection and try again.',
       });
     } finally {
       setInquirySubmitting(false);
@@ -272,54 +348,44 @@ const GallerySection = () => {
     [lightboxIndex, filteredImages]
   );
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        if (lightboxIndex !== null) closeLightbox();
-        if (inquiryImage !== null) closeInquiry();
-      }
       if (lightboxIndex === null) return;
+      if (e.key === 'Escape') closeLightbox();
       if (e.key === 'ArrowLeft') navigateLightbox(-1);
       if (e.key === 'ArrowRight') navigateLightbox(1);
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [lightboxIndex, inquiryImage, closeLightbox, closeInquiry, navigateLightbox]);
+  }, [lightboxIndex, navigateLightbox]);
 
   return (
-    <motion.section
-      ref={galleryRef}
-      style={{ opacity: sectionOpacity }}
-      id="gallery"
-      className="relative bg-[#ECE6DC] px-6 py-[80px] sm:px-8 lg:px-12 lg:py-[128px]"
-    >
-      <div className="mx-auto max-w-[1400px]">
-        {/* Header */}
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
-          variants={fadeUpVariants}
-          className="flex flex-col items-start"
-        >
-          <span className="section-label text-[#C89B4A]">05 / VISUAL INDEX</span>
+    <div id="gallery" className="relative w-full bg-[#ECE6DC]">
+      
+      {/* Header (scrollable/natural) */}
+      <div className="bg-[#ECE6DC] px-6 py-[80px] sm:px-8 lg:px-12 lg:py-[108px] border-b border-[#DED8CC]">
+        <div className="mx-auto max-w-[1400px]">
+          <span className="section-label text-[#C89B4A]">06 / VISUAL INDEX</span>
           <h2 className="display-heading mt-5 text-[clamp(2.4rem,3.8vw,4.2rem)] font-light text-[#2F2F2F]">
             In the <span className="italic font-display text-[#C89B4A]">wild</span>.
           </h2>
-        </motion.div>
+        </div>
+      </div>
 
-        {/* Categories Tabs */}
-        <div className="mt-10 overflow-x-auto scrollbar-hide -mx-6 px-6 sm:mx-0 sm:px-0">
-          <div className="flex flex-nowrap gap-2.5 pb-2">
+      {/* Sticky Categories Bar */}
+      <div className="sticky top-[68px] lg:top-[76px] w-full z-40 bg-[#ECE6DC]/85 backdrop-blur-[12px] border-b border-[#DED8CC] px-6 py-4 md:px-8 lg:px-12 flex justify-center">
+        <div className="overflow-x-auto scrollbar-hide no-scrollbar max-w-[1400px] w-full">
+          <div className="flex flex-row gap-2.5 justify-center md:justify-start lg:justify-center">
             {CATEGORIES.map((tab) => {
               const isSelected = activeTab === tab.value;
               return (
                 <button
                   key={tab.value}
-                  onClick={() => setActiveTab(tab.value)}
-                  className={`shrink-0 rounded-full px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.12em] transition-all duration-300 border ${
+                  onClick={() => {
+                    setActiveTab(tab.value);
+                    document.getElementById('gallery')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className={`shrink-0 rounded-full px-5 py-2 text-[0.7rem] font-medium uppercase tracking-[0.12em] transition-all duration-300 border ${
                     isSelected
                       ? 'bg-[#C89B4A] text-white border-[#C89B4A]'
                       : 'bg-[#F5F1EA] text-[#6B6B6B] border-[#DED8CC] hover:bg-[#FEFCF8] hover:text-[#2F2F2F] hover:border-[#C89B4A]/40'
@@ -331,90 +397,26 @@ const GallerySection = () => {
             })}
           </div>
         </div>
+      </div>
 
-        {/* Gallery Grid */}
-        <div className="mt-10">
-          {loading ? (
-            /* Skeleton Grid */
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:grid-auto-rows-[280px]">
-              {[...Array(6)].map((_, index) => {
-                const isTall = index % 6 === 1 || index % 6 === 4;
-                return (
-                  <div
-                    key={index}
-                    className={`bg-[#F5F1EA] animate-pulse border border-[#DED8CC] ${
-                      isTall
-                        ? 'lg:row-span-2 lg:h-[584px]'
-                        : 'lg:row-span-1 lg:h-[280px]'
-                    } h-[280px] w-full`}
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            /* Image Grid with Animations */
-            <motion.div
-              layout
-              className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:grid-auto-rows-[280px]"
-            >
-              <AnimatePresence mode="popLayout">
-                {filteredImages.map((image, index) => {
-                  const isTall = index % 6 === 1 || index % 6 === 4;
-                  return (
-                    <motion.div
-                      key={image._id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true, margin: '-50px' }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.55, ease: 'easeOut' }}
-                      onClick={() => openLightbox(index)}
-                      className={`group relative overflow-hidden cursor-pointer select-none bg-[#FEFCF8] border border-[#DED8CC] transition-[border-color,box-shadow,transform] duration-500 hover:border-[#C89B4A]/60 hover:shadow-[0_16px_48px_rgba(200,155,74,0.14)] ${
-                        isTall
-                          ? 'lg:row-span-2 lg:h-[584px]'
-                          : 'lg:row-span-1 lg:h-[280px]'
-                      } h-[280px] w-full`}
-                    >
-                      {/* Image */}
-                      <img
-                        src={image.imageUrl}
-                        alt={image.caption || 'Thakkar Traders Material'}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-[600ms] will-change-transform group-hover:scale-105"
-                      />
-
-                      {/* Dark Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#120F0C]/78 via-[#120F0C]/28 to-transparent opacity-70 transition-opacity duration-350 ease-in-out group-hover:opacity-100" />
-
-                      {/* Gold Plus Icon */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openInquiry(image);
-                        }}
-                        aria-label={`Send inquiry for ${image.caption || 'gallery image'}`}
-                        className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/18 bg-[#0D0A07]/70 text-[#FFF9F0] shadow-[0_10px_22px_rgba(0,0,0,0.22)] backdrop-blur-[4px] opacity-100 translate-y-0 pointer-events-auto transition-all duration-300 hover:border-[#C89B4A]/55 hover:bg-[#C89B4A] hover:text-white md:opacity-0 md:translate-y-1 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:translate-y-0 md:group-hover:pointer-events-auto"
-                      >
-                        <Plus size={18} />
-                      </button>
-
-                      {/* Caption text */}
-                      {image.caption && (
-                        <div className="absolute bottom-5 left-5 right-5 rounded-2xl border border-white/10 bg-[#0D0A07]/55 px-4 py-3 text-center text-[#F8F4EE] opacity-100 translate-y-0 shadow-[0_12px_28px_rgba(0,0,0,0.28)] backdrop-blur-[4px] transition-all duration-350 ease-out md:opacity-0 md:translate-y-5 md:group-hover:opacity-100 md:group-hover:translate-y-0">
-                          <p className="font-display italic text-[0.95rem] md:text-[1.02rem] leading-snug m-0 text-[#FFF9F0] drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)]">
-                            {image.caption}
-                          </p>
-                        </div>
-                      )}
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </motion.div>
-          )}
-        </div>
+      {/* Vertical Stack of Scroll Reveal Items */}
+      <div className="w-full">
+        {loading ? (
+          <div className="w-full h-screen flex items-center justify-center bg-black">
+            <Loader2 className="h-10 w-10 animate-spin text-[#C89B4A]" />
+          </div>
+        ) : (
+          filteredImages.map((image, index) => (
+            <GalleryItem
+              key={image._id || index}
+              image={image}
+              index={index}
+              total={filteredImages.length}
+              openLightbox={openLightbox}
+              openInquiry={openInquiry}
+            />
+          ))
+        )}
       </div>
 
       {/* Lightbox Modal */}
@@ -443,7 +445,6 @@ const GallerySection = () => {
 
             {/* Middle row: navigation & image */}
             <div className="flex flex-1 items-center justify-between relative w-full my-4">
-              {/* Left Arrow */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -455,7 +456,6 @@ const GallerySection = () => {
                 <ChevronLeft className="h-7 w-7 sm:h-9 sm:w-9" />
               </button>
 
-              {/* Centered Image Container */}
               <div className="flex-1 flex justify-center items-center h-full max-h-[80vh] px-2">
                 <motion.img
                   key={filteredImages[lightboxIndex]?._id}
@@ -469,7 +469,6 @@ const GallerySection = () => {
                 />
               </div>
 
-              {/* Right Arrow */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -707,7 +706,7 @@ const GallerySection = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.section>
+    </div>
   );
 };
 

@@ -35,28 +35,28 @@ const BrandsSection = () => {
   const currentCategory = BRAND_CATEGORIES.find((cat) => cat.id === activeCategory) || BRAND_CATEGORIES[0];
 
   return (
-    <section id="brands" className="bg-[#1A1A1A] text-[#F5F0E8] px-6 py-[80px] md:px-8 md:py-24 lg:px-12 lg:py-[128px] overflow-hidden select-none">
+    <section id="brands" className="bg-[#ECE6DC] text-[#2F2F2F] px-6 py-[80px] md:px-8 md:py-24 lg:px-12 lg:py-[128px] overflow-hidden select-none">
       <div className="mx-auto max-w-[1400px]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
           
           {/* Left Column — Headers & Category Tabs */}
           <div className="lg:col-span-5 flex flex-col items-start">
             <span 
-              style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', letterSpacing: '0.22em', color: '#C9A84C' }}
+              style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', letterSpacing: '0.22em', color: '#C89B4A' }}
               className="uppercase font-semibold"
             >
               03 / AUTHORIZED BRANDS
             </span>
             <h2 
               style={{ fontFamily: "'Cormorant Garamond', serif" }}
-              className="text-[clamp(2.5rem,4.5vw,4.5rem)] font-light leading-[1.08] text-[#F5F0E8] mt-6"
+              className="text-[clamp(2.5rem,4.5vw,4.5rem)] font-light leading-[1.08] text-[#2F2F2F] mt-6"
             >
               Trusted names,<br />
-              <span className="italic text-[#C9A84C]">authorized supply</span>.
+              <span className="italic text-[#C89B4A]">authorized supply</span>.
             </h2>
             <p 
               style={{ fontFamily: "'Inter', sans-serif" }}
-              className="text-[#9CA3AF] font-light text-[0.95rem] leading-[1.8] mt-6 max-w-md"
+              className="text-[#6B6B6B] font-light text-[0.95rem] leading-[1.8] mt-6 max-w-md"
             >
               We stock only genuine inventory from India's most respected interior material brands — specification-ready for every architectural design.
             </p>
@@ -74,7 +74,7 @@ const BrandsSection = () => {
                       fontFamily: "'DM Mono', monospace",
                       fontSize: '0.78rem',
                       letterSpacing: '0.12em',
-                      color: isActive ? '#F5F0E8' : '#6B7280',
+                      color: isActive ? '#2F2F2F' : '#8E867A',
                       fontWeight: isActive ? 600 : 400,
                     }}
                   >
@@ -82,7 +82,7 @@ const BrandsSection = () => {
                     {isActive && (
                       <motion.div
                         layoutId="activeBrandIndicator"
-                        className="absolute bottom-0 left-0 h-[2px] bg-[#C9A84C]"
+                        className="absolute bottom-0 left-0 h-[2px] bg-[#C89B4A]"
                         style={{ width: '40px' }}
                       />
                     )}
@@ -93,7 +93,7 @@ const BrandsSection = () => {
           </div>
 
           {/* Right Column — Brands List */}
-          <div className="lg:col-span-7 w-full border-t border-[#2A2A2A] lg:border-t-0">
+          <div className="lg:col-span-7 w-full border-t border-[#DED8CC] lg:border-t-0">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeCategory}
@@ -109,7 +109,7 @@ const BrandsSection = () => {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
-                    style={{ borderBottom: '1px solid #2A2A2A' }}
+                    style={{ borderBottom: '1px solid #DED8CC' }}
                     className="group py-6 flex items-center justify-between transition-all duration-300 cursor-pointer"
                   >
                     <span
@@ -118,12 +118,12 @@ const BrandsSection = () => {
                         fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)',
                         transition: 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.4s ease',
                       }}
-                      className="text-[#9CA3AF] group-hover:text-[#C9A84C] group-hover:translate-x-3"
+                      className="text-[#555555] group-hover:text-[#C89B4A] group-hover:translate-x-3"
                     >
                       {brand}
                     </span>
                     <span 
-                      style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', color: '#6B7280' }}
+                      style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', color: '#8E867A' }}
                       className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     >
                       SPECIFICATION SUPPORT →

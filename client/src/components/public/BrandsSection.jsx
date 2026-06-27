@@ -35,7 +35,7 @@ const BrandsSection = () => {
   const currentCategory = BRAND_CATEGORIES.find((cat) => cat.id === activeCategory) || BRAND_CATEGORIES[0];
 
   return (
-    <section id="brands" className="bg-[#FEFCF8] text-[#2F2F2F] px-6 py-[80px] md:px-8 md:py-24 lg:px-12 lg:py-[128px] overflow-hidden select-none">
+    <section id="brands" className="bg-[#F5F1EA] text-[#2F2F2F] px-6 py-[80px] md:px-8 md:py-24 lg:px-12 lg:py-[128px] overflow-hidden select-none">
       <div className="mx-auto max-w-[1400px]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
           

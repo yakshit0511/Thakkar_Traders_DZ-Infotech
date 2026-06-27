@@ -106,34 +106,13 @@ const HeritageBanner = () => {
               transition={{ duration: 0.4 }}
               className="absolute inset-0 flex flex-col items-center justify-center"
             >
-              {/* Layer 1 — Ghost background text */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.1 }}
-                transition={{ duration: 1.0, ease: 'easeIn' }}
-                className="absolute flex flex-col items-center justify-center text-center pointer-events-none"
-                style={{
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '100%',
-                }}
-              >
-                <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: 'clamp(2.8rem, 6vw, 6.5rem)', color: '#F5F0E8', letterSpacing: 'normal', margin: 0, lineHeight: 1.1 }}>
-                  {slide.ghostLine1}
-                </h2>
-                <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: 'clamp(2.8rem, 6vw, 6.5rem)', color: '#F5F0E8', letterSpacing: 'normal', margin: 0, lineHeight: 1.1 }}>
-                  {slide.ghostLine2}
-                </h2>
-              </motion.div>
-
-              {/* Layer 2 — Foreground prominent text */}
+              {/* Foreground prominent text */}
               <div
                 style={{
                   position: 'absolute',
                   top: '50%',
                   left: '50%',
-                  transform: 'translate(-50%, -50%) translateY(48px)',
+                  transform: 'translate(-50%, -50%)',
                   width: '100%',
                   pointerEvents: 'auto',
                 }}
@@ -141,7 +120,7 @@ const HeritageBanner = () => {
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.5, ease: 'easeOut' }}
+                  transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
                   className="flex flex-col items-center justify-center text-center"
                 >
                   <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400, fontSize: 'clamp(2.8rem, 6vw, 6.5rem)', color: '#F5F0E8', margin: 0, lineHeight: 1.1 }}>
@@ -155,7 +134,7 @@ const HeritageBanner = () => {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4, delay: 0.9 }}
+                    transition={{ duration: 0.4, delay: 0.6 }}
                     style={{
                       marginTop: '40px',
                       width: '60px',
@@ -168,7 +147,7 @@ const HeritageBanner = () => {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4, delay: 0.9 }}
+                    transition={{ duration: 0.4, delay: 0.6 }}
                     style={{
                       marginTop: '24px',
                       display: 'flex',

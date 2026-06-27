@@ -6,6 +6,7 @@ import BrandsSection from '../../components/public/BrandsSection';
 import HeritageBanner from '../../components/public/HeritageBanner';
 import StatsSection from '../../components/public/StatsSection';
 import ProjectsSection from '../../components/public/ProjectsSection';
+import PlantTransitionSection from '../../components/public/PlantTransitionSection';
 import GallerySection from '../../components/public/GallerySection';
 import ServicesSection from '../../components/public/ServicesSection';
 import TestimonialsSection from '../../components/public/TestimonialsSection';
@@ -29,6 +30,7 @@ const HomePage = () => (
     <HeritageBanner />
     <StatsSection />
     <ProjectsSection />
+    <PlantTransitionSection />
     <GallerySection />
     <ServicesSection />
     <TestimonialsSection />

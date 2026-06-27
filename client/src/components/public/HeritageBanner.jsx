@@ -1,120 +1,203 @@
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useRef, useState, useEffect } from 'react';
+import { motion, useScroll, AnimatePresence } from 'framer-motion';
 
 const SLIDES = [
-  { number: '01', label: 'HERITAGE', text: '15+ years of curating the finest materials in India.' },
-  { number: '02', label: 'AUDIENCE', text: 'Serving architects, builders & interior designers.' },
-  { number: '03', label: 'CRAFT', text: 'Premium materials for exceptional spaces.' },
-  { number: '04', label: 'REACH', text: 'Trusted across Gujarat & beyond.' },
+  {
+    number: '01',
+    label: 'HERITAGE',
+    ghostLine1: '15+ years of curating the',
+    ghostLine2: 'finest materials in India',
+    foreLine1: 'Serving architects, builders',
+    foreLine2: 'and interior designers.',
+  },
+  {
+    number: '02',
+    label: 'AUDIENCE',
+    ghostLine1: 'Serving architects, builders',
+    ghostLine2: 'and interior designers',
+    foreLine1: 'Premium materials for',
+    foreLine2: 'exceptional spaces.',
+  },
+  {
+    number: '03',
+    label: 'CRAFT',
+    ghostLine1: 'Premium materials for',
+    ghostLine2: 'exceptional spaces',
+    foreLine1: 'Trusted across Gujarat',
+    foreLine2: 'and far beyond.',
+  },
+  {
+    number: '04',
+    label: 'REACH',
+    ghostLine1: 'Trusted across Gujarat',
+    ghostLine2: 'and far beyond',
+    foreLine1: 'Defining luxury interiors',
+    foreLine2: 'with curated heritage.',
+  },
 ];
 
-const slideVariants = {
-  enter: (direction) => ({ y: direction > 0 ? 44 : -44, opacity: 0 }),
-  center: {
-    y: 0, opacity: 1,
-    transition: {
-      y: { type: 'spring', stiffness: 200, damping: 28 },
-      opacity: { duration: 0.5 },
-    },
-  },
-  exit: (direction) => ({
-    y: direction < 0 ? 44 : -44, opacity: 0,
-    transition: { opacity: { duration: 0.4 } },
-  }),
-};
-
 const HeritageBanner = () => {
-  const [[page, direction], setPage] = useState([0, 0]);
-  const currentSlide = Math.abs(page % SLIDES.length);
-  const slide = SLIDES[currentSlide];
+  const parentRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  const paginate = (newDirection) => setPage([page + newDirection, newDirection]);
+  const { scrollYProgress } = useScroll({
+    target: parentRef,
+    offset: ['start start', 'end end'],
+  });
 
   useEffect(() => {
-    const timer = setInterval(() => paginate(1), 4500);
-    return () => clearInterval(timer);
-  }, [page]);
+    const unsubscribe = scrollYProgress.on('change', (latest) => {
+      // Divide progress into 4 ranges
+      let index = Math.floor(latest * 4);
+      if (index > 3) index = 3;
+      if (index < 0) index = 0;
+      setActiveIndex(index);
+    });
+    return () => unsubscribe();
+  }, [scrollYProgress]);
+
+  const slide = SLIDES[activeIndex];
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#2F2F2F] flex items-center justify-center select-none py-[100px] min-h-[560px]">
-      {/* Decorative wood-grain texture overlay */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.04]">
-        <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
-          <filter id="heritage-noise">
-            <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="4" stitchTiles="stitch" />
-            <feColorMatrix type="matrix" values="0 0 0 0 0.8  0 0 0 0 0.7  0 0 0 0 0.5  0 0 0 0.9 0" />
-          </filter>
-          <rect width="100%" height="100%" filter="url(#heritage-noise)" />
-        </svg>
-      </div>
+    <div ref={parentRef} className="relative w-full" style={{ height: '300vh' }}>
+      <div className="sticky top-0 w-full h-screen bg-[#2F2F2F] overflow-hidden flex flex-col items-center justify-center select-none">
+        
+        {/* Decorative wood-grain texture overlay */}
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.04]">
+          <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
+            <filter id="heritage-noise">
+              <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="4" stitchTiles="stitch" />
+              <feColorMatrix type="matrix" values="0 0 0 0 0.8  0 0 0 0 0.7  0 0 0 0 0.5  0 0 0 0 0.9 0" />
+            </filter>
+            <rect width="100%" height="100%" filter="url(#heritage-noise)" />
+          </svg>
+        </div>
 
-      {/* Gold top/bottom border lines */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C89B4A]/60 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C89B4A]/40 to-transparent" />
+        {/* Gold top/bottom border lines */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/60 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
 
-      {/* Gold corner accents */}
-      <div className="absolute top-8 left-8 w-10 h-10 border-t border-l border-[#C89B4A]/30 hidden lg:block" />
-      <div className="absolute top-8 right-8 w-10 h-10 border-t border-r border-[#C89B4A]/30 hidden lg:block" />
-      <div className="absolute bottom-8 left-8 w-10 h-10 border-b border-l border-[#C89B4A]/30 hidden lg:block" />
-      <div className="absolute bottom-8 right-8 w-10 h-10 border-b border-r border-[#C89B4A]/30 hidden lg:block" />
+        {/* Corner frame decorations */}
+        <div className="absolute top-6 left-6 w-10 h-10 border-t border-l border-[rgba(245,240,232,0.15)] pointer-events-none hidden sm:block" />
+        <div className="absolute top-6 right-6 w-10 h-10 border-t border-r border-[rgba(245,240,232,0.15)] pointer-events-none hidden sm:block" />
+        <div className="absolute bottom-6 left-6 w-10 h-10 border-b border-l border-[rgba(245,240,232,0.15)] pointer-events-none hidden sm:block" />
+        <div className="absolute bottom-6 right-6 w-10 h-10 border-b border-r border-[rgba(245,240,232,0.15)] pointer-events-none hidden sm:block" />
 
-      <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-[1200px] w-full">
-        {/* Slide content */}
-        <div className="relative h-[300px] sm:h-[240px] lg:h-[260px] w-full flex flex-col items-center justify-center overflow-hidden">
-          <AnimatePresence initial={false} custom={direction}>
+        {/* Section label */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="absolute top-[60px] left-1/2 -translate-x-1/2 z-10"
+        >
+          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', letterSpacing: '0.22em', color: '#C9A84C' }} className="uppercase">
+            02 — HERITAGE
+          </span>
+        </motion.div>
+
+        {/* Relative container that fills the sticky section */}
+        <div className="relative w-full max-w-[1200px] h-full flex flex-col items-center justify-center z-10 px-6">
+          <AnimatePresence mode="wait">
             <motion.div
-              key={currentSlide}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
+              key={activeIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
               className="absolute inset-0 flex flex-col items-center justify-center"
             >
-              {/* Label */}
-              <span className="font-mono text-[0.62rem] tracking-[0.28em] uppercase text-[#C89B4A] mb-8">
-                {slide.number} — {slide.label}
-              </span>
+              {/* Layer 1 — Ghost background text */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.1 }}
+                transition={{ duration: 1.0, ease: 'easeIn' }}
+                className="absolute flex flex-col items-center justify-center text-center pointer-events-none"
+                style={{
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '100%',
+                }}
+              >
+                <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: 'clamp(2.8rem, 6vw, 6.5rem)', color: '#F5F0E8', letterSpacing: 'normal', margin: 0, lineHeight: 1.1 }}>
+                  {slide.ghostLine1}
+                </h2>
+                <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: 'clamp(2.8rem, 6vw, 6.5rem)', color: '#F5F0E8', letterSpacing: 'normal', margin: 0, lineHeight: 1.1 }}>
+                  {slide.ghostLine2}
+                </h2>
+              </motion.div>
 
-              {/* Main text */}
-              <h2 className="font-display font-light text-[clamp(2.4rem,5.2vw,5.5rem)] leading-[1.12] text-[#F5F1EA] max-w-5xl text-center">
-                {slide.text.includes('&') ? (
-                  <>
-                    {slide.text.split('&')[0]}
-                    <span className="font-display italic text-[#C89B4A] mx-3">&</span>
-                    {slide.text.split('&')[1]}
-                  </>
-                ) : (
-                  slide.text
-                )}
-              </h2>
+              {/* Layer 2 — Foreground prominent text */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%) translateY(48px)',
+                  width: '100%',
+                  pointerEvents: 'auto',
+                }}
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.5, ease: 'easeOut' }}
+                  className="flex flex-col items-center justify-center text-center"
+                >
+                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400, fontSize: 'clamp(2.8rem, 6vw, 6.5rem)', color: '#F5F0E8', margin: 0, lineHeight: 1.1 }}>
+                    {slide.foreLine1}
+                  </h3>
+                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400, fontStyle: 'italic', fontSize: 'clamp(2.8rem, 6vw, 6.5rem)', color: '#C9A84C', margin: 0, lineHeight: 1.1 }}>
+                    {slide.foreLine2}
+                  </h3>
+
+                  {/* Decorative gold line */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4, delay: 0.9 }}
+                    style={{
+                      marginTop: '40px',
+                      width: '60px',
+                      height: '1px',
+                      background: '#C9A84C',
+                    }}
+                  />
+
+                  {/* Decorative dots */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4, delay: 0.9 }}
+                    style={{
+                      marginTop: '24px',
+                      display: 'flex',
+                      gap: '10px',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {SLIDES.map((_, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          background: idx === activeIndex ? '#C9A84C' : 'transparent',
+                          border: idx === activeIndex ? 'none' : '1px solid rgba(245,240,232,0.25)',
+                        }}
+                      />
+                    ))}
+                  </motion.div>
+                </motion.div>
+              </div>
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* Gold divider */}
-        <div className="mt-8 h-px w-16 bg-[#C89B4A]/50" />
-
-        {/* Navigation dots */}
-        <div className="flex gap-3 z-20 justify-center mt-8">
-          {SLIDES.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => {
-                const dir = index > currentSlide ? 1 : -1;
-                setPage([index, dir]);
-              }}
-              className={`h-[3px] rounded-full transition-all duration-400 ${
-                index === currentSlide
-                  ? 'w-8 bg-[#C89B4A]'
-                  : 'w-3 bg-[#C89B4A]/25 hover:bg-[#C89B4A]/50'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
       </div>
-    </section>
+    </div>
   );
 };
 

@@ -136,7 +136,7 @@ const GalleryItem = ({ image, index, total, openLightbox, openInquiry }) => {
       <div className="absolute inset-0 z-20">
         
         {/* Top row: positioned absolutely to sit high up in the viewport */}
-        <div className="absolute top-[100px] md:top-[110px] lg:top-[116px] left-6 right-6 md:left-12 md:right-12 lg:left-16 lg:right-16 flex justify-between items-center z-30">
+        <div className="absolute top-[80px] md:top-[90px] lg:top-[96px] left-6 right-6 md:left-12 md:right-12 lg:left-16 lg:right-16 flex justify-between items-center z-30">
           <div className="flex flex-col items-start gap-1">
             <span 
               style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.5)' }}

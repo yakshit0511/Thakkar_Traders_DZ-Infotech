@@ -133,10 +133,10 @@ const GalleryItem = ({ image, index, total, openLightbox, openInquiry }) => {
       <div className="absolute inset-0 bg-[#080502]/40 z-10 pointer-events-none" />
 
       {/* Info Overlay (Index, Caption, Actions) */}
-      <div className="absolute inset-0 flex flex-col justify-between p-8 md:p-16 lg:p-24 z-20">
+      <div className="absolute inset-0 z-20">
         
-        {/* Top row: index & category on left, action buttons on right */}
-        <div className="flex justify-between items-center w-full mt-[80px]">
+        {/* Top row: positioned absolutely to sit high up in the viewport */}
+        <div className="absolute top-[136px] md:top-[150px] left-6 right-6 md:left-12 md:right-12 lg:left-16 lg:right-16 flex justify-between items-center z-30">
           <div className="flex flex-col items-start gap-1">
             <span 
               style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.5)' }}
@@ -172,7 +172,7 @@ const GalleryItem = ({ image, index, total, openLightbox, openInquiry }) => {
         </div>
 
         {/* Center: Caption */}
-        <div className="flex flex-col items-center text-center max-w-4xl mx-auto my-auto pointer-events-none">
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center max-w-4xl mx-auto px-6 pointer-events-none">
           <motion.h3
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 0.95, y: 0 } : { opacity: 0, y: 20 }}
@@ -183,9 +183,6 @@ const GalleryItem = ({ image, index, total, openLightbox, openInquiry }) => {
             {image.caption}
           </motion.h3>
         </div>
-
-        {/* Bottom space empty to balance layout */}
-        <div className="h-4" />
 
       </div>
     </motion.div>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { Plus, X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import api from '../../utils/api';
@@ -134,23 +135,44 @@ const GalleryItem = ({ image, index, total, openLightbox, openInquiry }) => {
       {/* Info Overlay (Index, Caption, Actions) */}
       <div className="absolute inset-0 flex flex-col justify-between p-8 md:p-16 lg:p-24 z-20">
         
-        {/* Top row: index & category */}
+        {/* Top row: index & category on left, action buttons on right */}
         <div className="flex justify-between items-center w-full mt-[80px]">
-          <span 
-            style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.5)' }}
-          >
-            {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
-          </span>
-          <span 
-            style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', letterSpacing: '0.18em', color: '#C9A84C' }}
-            className="uppercase font-medium"
-          >
-            {image.category?.replace('-', ' ')}
-          </span>
+          <div className="flex flex-col items-start gap-1">
+            <span 
+              style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.5)' }}
+            >
+              {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+            </span>
+            <span 
+              style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', letterSpacing: '0.18em', color: '#C9A84C' }}
+              className="uppercase font-medium"
+            >
+              {image.category?.replace('-', ' ')}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => openLightbox(index)}
+              style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.72rem', letterSpacing: '0.12em' }}
+              className="text-[#F5F0E8] hover:text-[#C9A84C] transition-colors border-b border-white/20 hover:border-[#C9A84C] pb-1 uppercase focus:outline-none"
+            >
+              VIEW FULLSCREEN
+            </button>
+            
+            <button
+              onClick={() => openInquiry(image)}
+              style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.72rem', letterSpacing: '0.12em' }}
+              className="bg-[#C9A84C] hover:bg-[#A8732A] text-white px-5 py-2 transition-all uppercase flex items-center gap-2 focus:outline-none"
+            >
+              <Plus size={14} />
+              <span>INQUIRE</span>
+            </button>
+          </div>
         </div>
 
-        {/* Center: Caption, View and Inquiry */}
-        <div className="flex flex-col items-center text-center max-w-4xl mx-auto my-auto">
+        {/* Center: Caption */}
+        <div className="flex flex-col items-center text-center max-w-4xl mx-auto my-auto pointer-events-none">
           <motion.h3
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 0.95, y: 0 } : { opacity: 0, y: 20 }}
@@ -160,30 +182,6 @@ const GalleryItem = ({ image, index, total, openLightbox, openInquiry }) => {
           >
             {image.caption}
           </motion.h3>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="mt-8 flex items-center gap-6"
-          >
-            <button
-              onClick={() => openLightbox(index)}
-              style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.75rem', letterSpacing: '0.15em' }}
-              className="text-[#F5F0E8] hover:text-[#C9A84C] transition-colors border-b border-white/20 hover:border-[#C9A84C] pb-1 uppercase focus:outline-none"
-            >
-              VIEW FULLSCREEN
-            </button>
-            
-            <button
-              onClick={() => openInquiry(image)}
-              style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.75rem', letterSpacing: '0.15em' }}
-              className="bg-[#C9A84C] hover:bg-[#A8732A] text-white px-6 py-2.5 transition-all uppercase flex items-center gap-2 focus:outline-none"
-            >
-              <Plus size={14} />
-              <span>INQUIRE</span>
-            </button>
-          </motion.div>
         </div>
 
         {/* Bottom space empty to balance layout */}
@@ -419,91 +417,109 @@ const GallerySection = () => {
         )}
       </div>
 
-      {/* Lightbox Modal */}
-      <AnimatePresence>
-        {lightboxIndex !== null && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[500] flex flex-col justify-between bg-[#0D0A07]/98 py-6 px-4 md:px-8 select-none"
-          >
-            {/* Header bar */}
-            <div className="flex justify-between items-center w-full z-10">
-              <div className="font-mono text-[0.7rem] text-[#8A8A7A]">
-                {lightboxIndex + 1} / {filteredImages.length}
-              </div>
-              <button
-                onClick={closeLightbox}
-                className="text-[#F2EDE3] hover:text-[#C4892E] transition-colors duration-200"
-                aria-label="Close lightbox"
+      {/* Lightbox Modal rendered via Portal */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {lightboxIndex !== null && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={closeLightbox}
+              className="fixed inset-0 z-[9999] flex flex-col justify-between bg-black/96 py-6 px-4 md:px-8 select-none cursor-pointer"
+            >
+              {/* Header bar */}
+              <div 
+                onClick={(e) => e.stopPropagation()} 
+                className="flex justify-between items-center w-full z-10 cursor-default"
               >
-                <X size={28} />
-              </button>
-            </div>
-
-            {/* Middle row: navigation & image */}
-            <div className="flex flex-1 items-center justify-between relative w-full my-4">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigateLightbox(-1);
-                }}
-                className="text-[#F2EDE3]/60 hover:text-[#F2EDE3] transition-colors duration-200 p-2 z-10"
-                aria-label="Previous image"
-              >
-                <ChevronLeft className="h-7 w-7 sm:h-9 sm:w-9" />
-              </button>
-
-              <div className="flex-1 flex justify-center items-center h-full max-h-[80vh] px-2">
-                <motion.img
-                  key={filteredImages[lightboxIndex]?._id}
-                  initial={{ opacity: 0, scale: 0.92 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.92 }}
-                  transition={{ duration: 0.3 }}
-                  src={filteredImages[lightboxIndex]?.imageUrl}
-                  alt={filteredImages[lightboxIndex]?.caption}
-                  className="max-w-full max-h-[75vh] md:max-h-[80vh] object-contain shadow-2xl"
-                />
+                <div className="font-mono text-[0.7rem] text-[#8A8A7A]">
+                  {lightboxIndex + 1} / {filteredImages.length}
+                </div>
+                <button
+                  onClick={closeLightbox}
+                  className="text-white bg-black/50 hover:bg-black hover:text-[#C89B4A] rounded-full p-2.5 transition-colors duration-200 focus:outline-none cursor-pointer"
+                  aria-label="Close lightbox"
+                >
+                  <X size={22} />
+                </button>
               </div>
 
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigateLightbox(1);
-                }}
-                className="text-[#F2EDE3]/60 hover:text-[#F2EDE3] transition-colors duration-200 p-2 z-10"
-                aria-label="Next image"
+              {/* Middle row: navigation & image */}
+              <div 
+                onClick={(e) => e.stopPropagation()} 
+                className="flex flex-1 items-center justify-between relative w-full my-4 cursor-default"
               >
-                <ChevronRight className="h-7 w-7 sm:h-9 sm:w-9" />
-              </button>
-            </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigateLightbox(-1);
+                  }}
+                  className="text-[#F2EDE3]/60 hover:text-[#F2EDE3] transition-colors duration-200 p-2 z-10 cursor-pointer"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="h-7 w-7 sm:h-9 sm:w-9" />
+                </button>
 
-            {/* Bottom caption */}
-            <div className="w-full text-center pb-2 z-10">
-              {filteredImages[lightboxIndex]?.caption && (
-                <p className="font-body font-light text-[0.9rem] text-[#F2EDE3]/70 m-0">
-                  {filteredImages[lightboxIndex].caption}
-                </p>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                <div 
+                  onClick={closeLightbox} 
+                  className="flex-1 flex justify-center items-center h-full max-h-[80vh] px-2 cursor-pointer"
+                >
+                  <motion.img
+                    key={filteredImages[lightboxIndex]?._id}
+                    initial={{ opacity: 0, scale: 0.92 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.92 }}
+                    transition={{ duration: 0.3 }}
+                    src={filteredImages[lightboxIndex]?.imageUrl}
+                    alt={filteredImages[lightboxIndex]?.caption}
+                    onClick={(e) => e.stopPropagation()}
+                    className="max-w-full max-h-[75vh] md:max-h-[80vh] object-contain shadow-2xl cursor-default"
+                  />
+                </div>
 
-      {/* Inquiry Modal */}
-      <AnimatePresence>
-        {inquiryImage !== null && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-[520] flex items-end justify-center bg-[#0D0A07]/94 px-0 py-0 sm:items-center sm:px-6 sm:py-6"
-            onClick={closeInquiry}
-          >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigateLightbox(1);
+                  }}
+                  className="text-[#F2EDE3]/60 hover:text-[#F2EDE3] transition-colors duration-200 p-2 z-10 cursor-pointer"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="h-7 w-7 sm:h-9 sm:w-9" />
+                </button>
+              </div>
+
+              {/* Bottom caption */}
+              <div 
+                onClick={(e) => e.stopPropagation()} 
+                className="w-full text-center pb-2 z-10 cursor-default"
+              >
+                {filteredImages[lightboxIndex]?.caption && (
+                  <p className="font-body font-light text-[0.9rem] text-[#F2EDE3]/70 m-0">
+                    {filteredImages[lightboxIndex].caption}
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
+      {/* Inquiry Modal rendered via Portal */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {inquiryImage !== null && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 z-[9999] flex items-end justify-center bg-[#0D0A07]/94 px-0 py-0 sm:items-center sm:px-6 sm:py-6"
+              onClick={closeInquiry}
+            >
             <motion.div
               initial={{ opacity: 0, y: 18, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -705,7 +721,9 @@ const GallerySection = () => {
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+    )}
     </div>
   );
 };

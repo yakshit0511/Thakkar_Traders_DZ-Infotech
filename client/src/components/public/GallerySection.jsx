@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Plus, X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import api from '../../utils/api';
 
@@ -98,6 +98,17 @@ const fadeUpVariants = {
 };
 
 const GallerySection = () => {
+  const galleryRef = useRef(null);
+  
+  // Track scroll progress to fade out the section as it leaves the top of the viewport
+  const { scrollYProgress } = useScroll({
+    target: galleryRef,
+    offset: ['start end', 'end start'],
+  });
+  
+  // Keep opacity fully 1 until 60% scrolled out, then fade to 0
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.6, 1], [1, 1, 0]);
+
   const [images, setImages] = useState([]);
   const [filteredImages, setFilteredImages] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
@@ -278,7 +289,9 @@ const GallerySection = () => {
   }, [lightboxIndex, inquiryImage, closeLightbox, closeInquiry, navigateLightbox]);
 
   return (
-    <section
+    <motion.section
+      ref={galleryRef}
+      style={{ opacity: sectionOpacity }}
       id="gallery"
       className="relative bg-[#ECE6DC] px-6 py-[80px] sm:px-8 lg:px-12 lg:py-[128px]"
     >
@@ -352,9 +365,10 @@ const GallerySection = () => {
                       key={image._id}
                       layout
                       initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true, margin: '-50px' }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.45 }}
+                      transition={{ duration: 0.55, ease: 'easeOut' }}
                       onClick={() => openLightbox(index)}
                       className={`group relative overflow-hidden cursor-pointer select-none bg-[#FEFCF8] border border-[#DED8CC] transition-[border-color,box-shadow,transform] duration-500 hover:border-[#C89B4A]/60 hover:shadow-[0_16px_48px_rgba(200,155,74,0.14)] ${
                         isTall
@@ -693,7 +707,7 @@ const GallerySection = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </section>
+    </motion.section>
   );
 };
 

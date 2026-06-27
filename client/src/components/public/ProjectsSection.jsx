@@ -82,7 +82,7 @@ const ProjectsSection = () => {
   const displayProjects = projects.length > 0 ? projects : DEFAULT_PROJECTS;
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: '400vh' }}>
+    <div id="projects" ref={containerRef} className="relative w-full" style={{ height: '400vh' }}>
       
       {/* Sticky Viewport Container */}
       <div className="sticky top-0 w-full h-screen overflow-hidden bg-[#F5F1EA] flex items-center select-none">
